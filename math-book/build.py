@@ -1,0 +1,302 @@
+# -*- coding: utf-8 -*-
+"""Build the Arabic math book: verify answers -> HTML with TeX -> render.js (KaTeX + fonts inline)."""
+import base64, os, re, subprocess, sys, urllib.request
+from content import LESSONS, EXAMS
+import verify
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+INSTR = {
+    "expand": "انشر واختزل كل عبارة:",
+    "factor": "حلّل كل عبارة إلى عوامل:",
+    "poly": "لكل كثيرة حدود: أ) انشر واختزل P(x)، ب) حلّل P(x).",
+    "roots": "بسّط كل عبارة:",
+    "rational": "أنطِق المقام ثم بسّط:",
+    "systems": "حلّ الأنظمة والمسائل التالية:",
+}
+LEVELS = [("easy", 1, "سهل", "تمارين مباشرة على القاعدة"),
+          ("medium", 2, "متوسّط", "قاعدتان أو أكثر في التمرين"),
+          ("hard", 3, "صعب", "مستوى الامتحان الرسمي وما فوق")]
+AR_LETTERS = ["أ", "ب", "ج", "د"]
+ROMAN = ["I", "II", "III", "IV", "V"]
+
+
+def m(t):  return r"\(" + t + r"\)"
+def dm(t): return r"\[" + t + r"\]"
+def fml(f):  # a rule formula: display TeX, or Arabic HTML when prefixed with "html:"
+    return f'<p class="rule-p">{f[5:]}</p>' if f.startswith("html:") else dm(f)
+
+
+# ---------- icons (inline svg, stroke uses currentColor) ----------------
+ICON = {
+    "hat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14.5V19h12v-4.5M6 14.5a4 4 0 0 1-.8-7.9A5 5 0 0 1 12 3.5a5 5 0 0 1 6.8 3.1 4 4 0 0 1-.8 7.9M6 14.5h12M9 16.5v2.5M12 16.5v2.5M15 16.5v2.5"/></svg>',
+    "warn": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4L12 4zM12 10v4.5M12 17.2v.3"/></svg>',
+    "book": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2 2 0 0 1 6 3.5h13v15H6a2 2 0 0 0-2 2zM4 20.5V5.5M8 7.5h7"/></svg>',
+    "target": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/></svg>',
+    "pen": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4.5l4 4L8 20H4v-4zM13.5 6.5l4 4"/></svg>',
+    "check": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+    "bulb": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
+}
+
+
+def meter(n):
+    return '<span class="meter" aria-label="المستوى %d من 3">%s</span>' % (
+        n, "".join('<i class="%s"></i>' % ("on" if k < n else "") for k in range(3)))
+
+
+# ---------- sections ----------------------------------------------------
+def cover():
+    chips = "".join('<li class="c-%s"><b>%d</b>%s</li>' % (L["color"], L["num"], L["title"]) for L in LESSONS)
+    glyphs = [r"\sqrt{2}", r"x^2", r"(a+b)^2", r"\begin{cases}x\\y\end{cases}", r"\frac{1}{\sqrt3}",
+              r"P(x)", r"a^2-b^2", r"\sqrt{48}", r"2x+y", r"(x-3)", r"\sqrt5", r"4x^2-9"]
+    g = "".join('<span class="g g%d">%s</span>' % (i, m(t)) for i, t in enumerate(glyphs))
+    return f'''
+<section class="sheet cover" id="top">
+  <div class="cover-glyphs" aria-hidden="true">{g}</div>
+  <div class="cover-in">
+    <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
+    <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
+    <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، وتمارين متدرّجة من السهل إلى الصعب — وفق أسئلة الامتحانات الرسميّة <b>2015 · 2016 · 2017</b>.</p>
+    <ol class="cover-chips">{chips}</ol>
+    <div class="cover-foot">
+      <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
+    </div>
+  </div>
+</section>'''
+
+
+def howto():
+    rows = "".join(f'<li>{meter(n)}<b>{name}</b><span>{d}</span></li>' for _, n, name, d in LEVELS)
+    parts = [("book", "الشرح والقواعد", "فكرة الدرس بكلمات بسيطة، ثم بطاقات القواعد التي يجب حفظها."),
+             ("check", "أمثلة محلولة", "حلول خطوة بخطوة — كثير منها من الامتحانات الرسميّة نفسها."),
+             ("hat", "تطبيقات", "مسائل من عالم المطبخ والمطعم والحلويات تُظهر فائدة الدرس."),
+             ("pen", "تمارين متدرّجة", "ثلاثة مستويات؛ الإجابات كلّها في آخر الكتاب.")]
+    cards = "".join(f'<div class="how-card"><span class="ico">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in parts)
+    toc = "".join(f'''<li class="c-{L["color"]}"><a href="#{L["id"]}"><span class="toc-n">{L["num"]}</span>
+      <span class="toc-t">{L["title"]}<small dir="ltr">{L["en"].split(" · ")[0]}</small></span></a></li>''' for L in LESSONS)
+    toc += '''<li class="c-ink"><a href="#exams"><span class="toc-n">7</span><span class="toc-t">الامتحانات الرسميّة ونماذج<small dir="ltr">Official exams 2015 · 2016 · 2017</small></span></a></li>
+      <li class="c-ink"><a href="#summary"><span class="toc-n">8</span><span class="toc-t">بطاقة المراجعة السريعة<small dir="ltr">Formula sheet</small></span></a></li>
+      <li class="c-ink"><a href="#answers"><span class="toc-n">9</span><span class="toc-t">الإجابات<small dir="ltr">Answer key</small></span></a></li>'''
+    return f'''
+<section class="sheet front">
+  <div class="front-grid">
+    <div>
+      <h2 class="h-sec">المحتويات</h2>
+      <ol class="toc">{toc}</ol>
+    </div>
+    <div>
+      <h2 class="h-sec">كيف تستعمل هذا الكتاب؟</h2>
+      <div class="how">{cards}</div>
+      <h3 class="h-sub">مستويات التمارين</h3>
+      <ul class="levels">{rows}</ul>
+      <p class="note-small">كل الأعداد مكتوبة بالأرقام الإنكليزيّة (0 1 2 3 …) والمتغيّرات بالرمزين \\(x\\) و\\(y\\) كما في النسخة الإنكليزيّة/الفرنسيّة من الامتحان.</p>
+    </div>
+  </div>
+</section>'''
+
+
+def rules_block(L):
+    cards = "".join(f'<div class="rule"><span class="rule-k">{k}</span><div class="rule-f">{fml(f)}</div></div>'
+                    for k, f in L["rules"])
+    return f'<div class="rules">{cards}</div>'
+
+
+def squares_table():
+    cells = "".join('<div><b>%s</b><span>%d</span></div>' % (m(r"\sqrt{%d}" % (n * n)), n) for n in range(1, 16))
+    return f'''<div class="squares"><p class="squares-t">المربّعات الكاملة — احفظها!</p><div class="sq-grid" dir="ltr">{cells}</div></div>'''
+
+
+def example_card(i, ex):
+    tag = f'<span class="tag">{ex["tag"]}</span>' if ex.get("tag") else ""
+    steps = "".join(f'''<li><div class="st-m">{dm(t)}</div>{f'<p class="st-n">{n}</p>' if n else ""}</li>'''
+                    for t, n in ex["steps"])
+    return f'''<article class="ex">
+  <header><span class="ex-n">مثال {i}</span>{tag}</header>
+  <div class="ex-q">{dm(ex["q"])}</div>
+  <ol class="steps">{steps}</ol>
+</article>'''
+
+
+def app_card(a):
+    return f'''<article class="app">
+  <header><span class="ico">{ICON["hat"]}</span><h4>{a["title"]}</h4></header>
+  <p>{a["body"]}</p>
+  <div class="app-sol"><span>الحلّ</span><p>{a["sol"]}</p></div>
+</article>'''
+
+
+def exercises(L):
+    out, k = [], 0
+    for key, n, name, desc in LEVELS:
+        items = []
+        for ex in L[key]:
+            k += 1
+            wide = ex["text"] or L["id"] == "poly"
+            body = f'<p>{ex["q"]}</p>' if ex["text"] else dm(ex["q"])
+            items.append(f'<li class="{"wide" if wide else ""}"><span class="q-n">{k}</span><div class="q-b">{body}</div></li>')
+        out.append(f'''<div class="lvl lvl-{n}">
+  <div class="lvl-h">{meter(n)}<h4>المستوى {n} · {name}</h4><span>{desc}</span></div>
+  <ol class="qs">{"".join(items)}</ol>
+</div>''')
+    return "".join(out)
+
+
+def lesson(L):
+    goals = "".join(f"<li>{g}</li>" for g in L["goals"])
+    words = "".join(f'<tr><td>{a}</td><td dir="ltr">{e}</td><td dir="ltr">{f}</td></tr>' for a, e, f in L["exam_words"])
+    exs = "".join(example_card(i + 1, e) for i, e in enumerate(L["examples"]))
+    apps = "".join(app_card(a) for a in L["apps"])
+    sq = squares_table() if L.get("squares") else ""
+    return f'''
+<section class="sheet lesson c-{L["color"]}" id="{L["id"]}">
+  <header class="opener">
+    <div class="op-num" aria-hidden="true">{L["num"]}</div>
+    <div class="op-t">
+      <p class="eyebrow">الدرس {L["num"]}</p>
+      <h2>{L["title"]}</h2>
+      <p class="op-en" dir="ltr">{L["en"]}</p>
+    </div>
+  </header>
+  <div class="op-meta">
+    <div class="goals"><h3><span class="ico">{ICON["target"]}</span>ماذا ستتعلّم؟</h3><ul>{goals}</ul></div>
+    <div class="words"><h3><span class="ico">{ICON["book"]}</span>كيف يأتي السؤال في الامتحان؟</h3>
+      <div class="tbl"><table><thead><tr><th>عربي</th><th>English</th><th>Français</th></tr></thead><tbody>{words}</tbody></table></div></div>
+  </div>
+
+  <h3 class="h-part"><span>1</span>الشرح</h3>
+  <div class="prose">{L["explain"]}</div>
+  {rules_block(L)}
+  {sq}
+  <aside class="warn"><span class="ico">{ICON["warn"]}</span><div><b>انتبه! أخطاء شائعة</b><p>{L["warn"]}</p></div></aside>
+
+  <h3 class="h-part"><span>2</span>أمثلة محلولة</h3>
+  <div class="exs">{exs}</div>
+
+  <h3 class="h-part"><span>3</span>تطبيقات من المطبخ والمطعم</h3>
+  <div class="apps">{apps}</div>
+
+  <h3 class="h-part"><span>4</span>تمارين</h3>
+  <p class="instr">{INSTR[L["id"]]}</p>
+  {exercises(L)}
+</section>'''
+
+
+def exams():
+    out = ['''<section class="sheet exams-intro" id="exams">
+  <p class="eyebrow">الفصل الأخير</p>
+  <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
+  <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم نموذجان جديدان على النمط نفسه تمامًا:
+  أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
+  حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
+  <ul class="exam-tips">
+    <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>النظام:</b> دائمًا تقريبًا السؤال الأوّل. تحقّق من الحلّ في المعادلتين.</p></li>
+    <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>P(x):</b> بعد النشر والتحليل احسب P(0) بالشكلين — يجب أن يتساويا.</p></li>
+    <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>إنطاق المقام:</b> السؤال الأخير عادةً؛ المرافق هو المفتاح في الجزء ب.</p></li>
+  </ul>
+</section>''']
+    for X in EXAMS:
+        qs = []
+        for qi, (ar, en, items) in enumerate(X["qs"]):
+            if len(items) == 1:
+                its = f'<div class="eq-one">{dm(items[0][0])}</div>'
+            else:
+                its = '<ol class="eq-items">' + "".join(
+                    f'<li><span>{AR_LETTERS[i]})</span>{dm(t) if not t.startswith(chr(92) + "text") else "<em>" + ("انشر واختزل P(x)" if i == 0 else "حلّل P(x)") + "</em>"}</li>'
+                    for i, (t, _, _) in enumerate(items)) + "</ol>"
+            qs.append(f'''<li class="eq"><div class="eq-h"><span class="eq-r">{ROMAN[qi]}</span><b>{ar}</b><small dir="ltr">{en}</small><span class="pts">5 pts</span></div>{its}</li>''')
+        badge = "رسمي" if X["official"] else "تدريب"
+        out.append(f'''
+<section class="sheet exam {"official" if X["official"] else "mock"}" id="{X["id"]}">
+  <header class="exam-h">
+    <div><span class="badge">{badge}</span><h2>{X["title"]}</h2><p>{X["sub"]}</p></div>
+    <dl><div><dt>المدّة</dt><dd>ساعة ونصف</dd></div><div><dt>التوزيع</dt><dd>5 علامات / سؤال</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
+  </header>
+  <ol class="eqs">{"".join(qs)}</ol>
+  <p class="exam-foot">الإجابات في آخر الكتاب ← <a href="#ans-{X["id"]}">{X["title"]}</a></p>
+</section>''')
+    return "".join(out)
+
+
+def summary():
+    blocks = []
+    for L in LESSONS:
+        r = "".join(f'<li><span class="sum-k">{k}</span>{fml(f)}</li>' for k, f in L["rules"])
+        blocks.append(f'<div class="sum c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ul>{r}</ul></div>')
+    return f'''
+<section class="sheet summary" id="summary">
+  <p class="eyebrow">قبل الامتحان</p>
+  <h2 class="h-big">بطاقة المراجعة السريعة</h2>
+  <div class="sum-grid">{"".join(blocks)}</div>
+</section>'''
+
+
+def answers():
+    out = []
+    for L in LESSONS:
+        k, items = 0, []
+        for key, n, name, _ in LEVELS:
+            for ex in L[key]:
+                k += 1
+                hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
+                items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
+        out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol></div>')
+    for X in EXAMS:
+        items = []
+        for qi, (_, _, its) in enumerate(X["qs"]):
+            parts = " &nbsp;·&nbsp; ".join((f"{AR_LETTERS[i]}) " if len(its) > 1 else "") + m(a) for i, (_, a, _) in enumerate(its))
+            items.append(f'<li><span class="a-n">{ROMAN[qi]}</span><div>{parts}</div></li>')
+        out.append(f'<div class="ans c-ink" id="ans-{X["id"]}"><h3><b>✓</b>{X["title"]}</h3><ol>{"".join(items)}</ol></div>')
+    return f'''
+<section class="sheet answers" id="answers">
+  <p class="eyebrow">صحّح نفسك</p>
+  <h2 class="h-big">الإجابات</h2>
+  <p class="prose-p">الإجابات النهائيّة لكل التمارين. الحلول المفصّلة لأسئلة الامتحانات الرسميّة موجودة في «أمثلة محلولة» داخل الدروس
+  (ابحث عن الشارة <span class="tag">امتحان</span>).</p>
+  <div class="ans-grid">{"".join(out)}</div>
+</section>'''
+
+
+# ---------- fonts: download Google fonts once and inline them ----------
+def font_css():
+    css = open(os.path.join(HERE, "fonts", "fonts.css"), encoding="utf-8").read()
+    blocks = re.findall(r"/\* ([a-z-]+) \*/\s*(@font-face\s*\{.*?\})", css, re.S)
+    out, cache = [], {}
+    for subset, blk in blocks:
+        if subset not in ("arabic", "latin"):
+            continue
+        url = re.search(r"url\((https://[^)]+)\)", blk).group(1)
+        if url not in cache:
+            fn = os.path.join(HERE, "fonts", os.path.basename(url))
+            if not os.path.exists(fn):
+                urllib.request.urlretrieve(url, fn)
+            cache[url] = "data:font/woff2;base64," + base64.b64encode(open(fn, "rb").read()).decode()
+        out.append(blk.replace(url, cache[url]))
+    return "\n".join(out)
+
+
+def main():
+    n, bad = verify.run()
+    if bad:
+        print("answers failed verification:", bad); sys.exit(1)
+    print(f"verified {n} answers")
+    css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
+    body = cover() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary() + answers()
+    html = f'''<title>رياضيات التكميلية المهنية</title>
+<meta name="description" content="كتاب رياضيات بالعربيّة: شرح، أمثلة، تطبيقات وتمارين متدرّجة وفق الامتحانات الرسميّة 2015–2017">
+<style>
+{font_css()}
+/*KATEX_CSS*/
+{css}
+</style>
+<div class="book" dir="rtl" lang="ar">
+{body}
+<footer class="colophon">رياضيات التكميليّة المهنيّة · أمين خدمة بالمطعم · طاهٍ · حلواني</footer>
+</div>
+'''
+    src = os.path.join(HERE, "book.src.html")
+    open(src, "w", encoding="utf-8").write(html)
+    subprocess.run(["node", os.path.join(HERE, "render.js"), src, os.path.join(HERE, "index.html")], check=True)
+
+
+if __name__ == "__main__":
+    main()
