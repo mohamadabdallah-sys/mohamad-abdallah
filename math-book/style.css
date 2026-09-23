@@ -278,6 +278,33 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 .qsol-part .steps { padding: 0 0 4px; }
 .qs-lab { font-family: var(--f-display); font-weight: 600; color: var(--c); padding-top: 10px; }
 
+/* Extra assessment */
+.assess { display: grid; gap: 12px; }
+.mcq { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+.mcq-q { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.mcq-q > div { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.mcq-o { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+.mcq-o li { display: flex; align-items: center; gap: 8px; }
+.mcq-o i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--c); color: var(--c);
+  font-style: normal; font-weight: 700; font-size: .75rem; font-family: var(--f-display); flex: none; }
+.open-q { border-radius: 10px; padding: 12px 16px; background: var(--soft); display: grid; gap: 6px; justify-items: start; }
+.open-q > p, .open-q > div { justify-self: stretch; }
+.ans-mc { grid-template-columns: repeat(4, 1fr); }
+
+/* Research */
+.research { border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 5%, var(--paper)) 0 12px, var(--paper) 12px 24px);
+  border: 1.5px solid color-mix(in srgb, var(--c) 45%, var(--paper)); }
+.research header { display: flex; gap: 10px; align-items: center; }
+.research header .ico { width: 38px; height: 38px; padding: 7px; border-radius: 50%; background: var(--c); color: var(--paper); }
+.rs-k { font-family: var(--f-display); font-size: .74rem; font-weight: 600; color: var(--c); letter-spacing: .03em; }
+.research h4 { font-size: 1.05rem; }
+.research dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+.research dl div { background: var(--paper); border-radius: 8px; padding: 6px 12px; border: 1px solid var(--line); }
+.research dt { font-size: .72rem; color: var(--ink-3); font-weight: 600; }
+.research dd { margin: 0; font-size: .88rem; }
+@media (max-width: 560px) { .research dl, .mcq-o { grid-template-columns: 1fr; } }
+
 /* Social-emotional learning */
 .sel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
 .sel-card { --k: var(--c); border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; align-content: start;
@@ -381,6 +408,7 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
   .cover-in { padding: 8mm 18mm 16mm; }
   .sel-card { break-inside: avoid; }
   .quiz-part { break-before: page; }
+  .mcq-q, .open-q, .research { break-inside: avoid; }
   .lquiz-sol { break-before: page; }
   .qsol { break-inside: avoid; }
   .cover-glyphs .g { font-size: 4rem; }

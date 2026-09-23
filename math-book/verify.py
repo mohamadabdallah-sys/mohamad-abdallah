@@ -54,6 +54,15 @@ def run():
                 n += 1
                 if not check(it["chk"]):
                     bad.append((L["id"], "quiz", qi + 1, it["chk"]))
+        for i, q in enumerate(L.get("mcq", [])):
+            n += 1
+            if q["expr"]:
+                ok = [check(("eq", q["expr"], o)) for o in q["syms"]]
+                good = ok[q["ans"]] and sum(ok) == 1
+            else:
+                good = all(check(c) for c in q["chk"])
+            if not good:
+                bad.append((L["id"], "mcq", i + 1))
         for i, t in enumerate(L.get("tf", [])):
             n += 1
             if check(t["chk"]) != t["truth"]:

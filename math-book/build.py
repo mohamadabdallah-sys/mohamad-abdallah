@@ -85,7 +85,6 @@ def cover():
     <div class="cover-glyphs" aria-hidden="true">{g}</div>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
     <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
-    <ol class="cover-chips">{chips}</ol>
     <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
       <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
@@ -102,6 +101,8 @@ def howto():
              ("pen", "تمارين متدرّجة", "من السهل إلى الصعب ثم «تحدٍّ ★» للمتفوّقين."),
              ("heart", "التعلّم الاجتماعي العاطفي", "أنشطة للتعاون والتأمّل والوعي بالذات وإدارتها في كل درس."),
              ("bulb", "بناء المهارات", "أربع خطوات لحلّ أيّ مسألة: أفهم، أخطّط، أنفّذ، أتحقّق."),
+             ("check", "تقييم إضافي", "أسئلة اختيار من متعدّد وسؤال مفتوح للتأكّد من الفهم."),
+             ("book", "سؤال بحث", "مشروع بحثيّ صغير في كل درس يربط الرياضيّات بالتاريخ والحياة."),
              ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
              ("pen", "نموذج امتحان الدرس", "امتحان قصير (20 علامة) في نهاية كل درس، يليه الحلّ المفصّل."),
              ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
@@ -246,6 +247,26 @@ def quiz(L):
 </div>'''
 
 
+def assess(L):
+    items = []
+    for i, q in enumerate(L["mcq"]):
+        opts = "".join(f'<li><i>{AR_LETTERS[j]}</i>{(o[5:] if o.startswith("html:") else m(o))}</li>' for j, o in enumerate(q["opts"]))
+        items.append(f'<li class="mcq-q"><span class="q-n">{i + 1}</span><div><p>{q["q"]}</p><ol class="mcq-o">{opts}</ol></div></li>')
+    return f'''<div class="assess">
+  <p class="instr">اختر الإجابة الصحيحة وضع دائرة حول حرفها:</p>
+  <ol class="mcq">{"".join(items)}</ol>
+  <div class="open-q"><span class="tag">سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
+</div>'''
+
+
+def research(L):
+    r = L["research"]
+    return f'''<aside class="research"><header><span class="ico">{ICON["globe"]}</span><div><span class="rs-k">سؤال بحث</span><h4>{r["title"]}</h4></div></header>
+  <p>{r["q"]}</p>
+  <dl><div><dt>مصادر مقترحة</dt><dd>مكتبة المدرسة، مقابلة مع صاحب مهنة، موقع تعليميّ موثوق</dd></div><div><dt>المنتَج المطلوب</dt><dd>{r["out"]}</dd></div></dl>
+</aside>'''
+
+
 def tf_items(L):
     return "".join(f'''<li><span class="q-n">{i + 1}</span><p>{t["s"]}</p>
       <span class="tf-box"><i></i>صح</span><span class="tf-box"><i></i>خطأ</span></li>''' for i, t in enumerate(L["tf"]))
@@ -300,13 +321,19 @@ def lesson(L):
   <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة.</p>
   <ol class="tf">{tf_items(L)}</ol>
 
-  <h3 class="h-part"><span>7</span>التعلّم الاجتماعي العاطفي: أنشطة<small dir="ltr">Social-Emotional Learning · SEL</small></h3>
+  <h3 class="h-part"><span>7</span>تقييم إضافي<small dir="ltr">Assessment</small></h3>
+  {assess(L)}
+
+  <h3 class="h-part"><span>8</span>التعلّم الاجتماعي العاطفي: أنشطة<small dir="ltr">Social-Emotional Learning · SEL</small></h3>
   {sel(L)}
+
+  <h3 class="h-part"><span>9</span>سؤال بحث<small dir="ltr">Research</small></h3>
+  {research(L)}
 
   <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
     <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
 
-  <h3 class="h-part quiz-part"><span>8</span>نموذج امتحان الدرس مع الحلّ</h3>
+  <h3 class="h-part quiz-part"><span>10</span>نموذج امتحان الدرس مع الحلّ</h3>
   {quiz(L)}
 </section>'''
 
@@ -315,7 +342,7 @@ def exams():
     out = ['''<section class="sheet exams-intro" id="exams">
   <p class="eyebrow">الفصل الأخير</p>
   <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
-  <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ثلاثة نماذج جديدة على النمط نفسه تمامًا:
+  <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ستّة نماذج جديدة على النمط نفسه تمامًا:
   أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
   حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
   <ul class="exam-tips">
@@ -369,10 +396,12 @@ def answers():
                 hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
                 items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
         sk = "".join(f'<li><span class="a-n">{i + 1}</span><div>{ex["a"]}</div></li>' for i, ex in enumerate(L["skills"]["practice"]))
+        mc = "".join(f'<li><span class="a-n">{i + 1}</span><div><b>{AR_LETTERS[q["ans"]]})</b></div></li>' for i, q in enumerate(L["mcq"]))
         tf = "".join(f'''<li><span class="a-n">{i + 1}</span><div><b class="{"ok" if t["truth"] else "no"}">{"صح" if t["truth"] else "خطأ"}</b>{(" — " + t["fix"]) if t["fix"] else ""}</div></li>'''
                      for i, t in enumerate(L["tf"]))
         out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol>'
                    f'<p class="ans-sub">بناء المهارات</p><ol>{sk}</ol>'
+                   f'<p class="ans-sub">اختيار من متعدّد</p><ol class="ans-mc">{mc}</ol>'
                    f'<p class="ans-sub">صح أم خطأ؟</p><ol>{tf}</ol></div>')
     for X in EXAMS:
         items = []
