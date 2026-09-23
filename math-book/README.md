@@ -6,17 +6,18 @@ An Arabic math book built from the official exam questions of 2015, 2016 and 201
 It uses English digits and `x`, `y` throughout.
 
 - `index.html`: the book. It is fully self-contained (fonts and math are embedded) and works offline.
-- `كتاب-الرياضيات.pdf`: an A4 print version.
+- `كتاب-الرياضيات.pdf`: an A4 print version for students (no answers).
+- `answers.html` / `دليل-الإجابات-للمعلم.pdf`: the teacher answer key, kept separate from the book.
 
 ## Contents
 Six lessons. Each lesson has an explanation, rule cards, common mistakes, worked examples, kitchen and restaurant
-applications, exercises at four levels (easy, medium, hard, challenge ★), a "Skills Builder" (problem-solving steps: understand, plan, solve, check), a "True or False?" set on common
+applications, exercises at four levels (easy, medium, hard, challenge ★), a "Skills Builder" (problem-solving steps: understand, plan, solve, check), social-emotional learning activities (cooperation, reflection, self-awareness & self-management…), a "True or False?" set on common
 mistakes and a "Rate yourself" checklist. The cover carries the Al-Mabarrat Association logo (`assets/mabarrat-logo.jpg`).
 The book ends with:
 - the 3 official exams
 - 3 mock exams in the same format
 - a formula sheet
-- a full answer key
+- (the answer key is a separate teacher file)
 
 ## Build
 ```

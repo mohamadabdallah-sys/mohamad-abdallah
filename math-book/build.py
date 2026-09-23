@@ -36,6 +36,13 @@ ICON = {
     "target": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/></svg>',
     "pen": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4.5l4 4L8 20H4v-4zM13.5 6.5l4 4"/></svg>',
     "check": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>',
+    "heart": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>',
+    "users": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M3 19c.5-3.3 2.7-5 5.5-5s5 1.7 5.5 5M14.5 14.2c2.9-.4 5.6 1 6.2 4.8"/></svg>',
+    "mirror": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a5 5 0 0 1 5 5c0 2.6-1.6 4-2.8 5.2-.7.7-.7 1.4-.7 2.3h-3c0-.9 0-1.6-.7-2.3C8.6 12 7 10.6 7 8a5 5 0 0 1 5-5zM10.5 18.5h3M11 21h2"/></svg>',
+    "compass": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
+    "chat": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>',
+    "scale": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M7 20h10M5 7h14M5 7l-2.5 6a2.5 2.5 0 0 0 5 0zM19 7l-2.5 6a2.5 2.5 0 0 0 5 0z"/></svg>',
+    "globe": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.4 3.6 8.5s-1.1 5.9-3.6 8.5c-2.5-2.6-3.6-5.4-3.6-8.5S9.5 6.1 12 3.5z"/></svg>',
     "bulb": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
 }
 
@@ -60,13 +67,17 @@ def cover():
     g = "".join('<span class="g g%d">%s</span>' % (i, m(t)) for i, t in enumerate(glyphs))
     return f'''
 <section class="sheet cover" id="top">
-  <div class="cover-glyphs" aria-hidden="true">{g}</div>
   <div class="cover-top">
-    <div class="cover-logo"><img src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447"></div>
+    <img class="cover-logo" src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447">
     <p class="cover-org">جمعيّة المبرّات الخيريّة</p>
-  </div>
-  <div class="cover-in">
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
+  </div>
+  <svg class="cover-wave" viewBox="0 0 800 70" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 40 C 180 0, 330 70, 520 34 S 720 10, 800 30 L800 70 L0 70 Z" fill="#E9B44C"/>
+    <path d="M0 50 C 180 10, 330 80, 520 44 S 720 20, 800 40 L800 70 L0 70 Z" fill="#0E5A34"/>
+  </svg>
+  <div class="cover-in">
+    <div class="cover-glyphs" aria-hidden="true">{g}</div>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
     <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
     <ol class="cover-chips">{chips}</ol>
@@ -83,7 +94,8 @@ def howto():
     parts = [("book", "الشرح والقواعد", "فكرة الدرس بكلمات بسيطة، ثم بطاقات القواعد التي يجب حفظها."),
              ("check", "أمثلة محلولة", "حلول خطوة بخطوة — كثير منها من الامتحانات الرسميّة نفسها."),
              ("hat", "تطبيقات", "مسائل من عالم المطبخ والمطعم والحلويات تُظهر فائدة الدرس."),
-             ("pen", "تمارين متدرّجة", "من السهل إلى الصعب ثم «تحدٍّ ★»؛ الإجابات كلّها في آخر الكتاب."),
+             ("pen", "تمارين متدرّجة", "من السهل إلى الصعب ثم «تحدٍّ ★» للمتفوّقين."),
+             ("heart", "التعلّم الاجتماعي العاطفي", "أنشطة للتعاون والتأمّل والوعي بالذات وإدارتها في كل درس."),
              ("bulb", "بناء المهارات", "أربع خطوات لحلّ أيّ مسألة: أفهم، أخطّط، أنفّذ، أتحقّق."),
              ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
              ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
@@ -91,8 +103,7 @@ def howto():
     toc = "".join(f'''<li class="c-{L["color"]}"><a href="#{L["id"]}"><span class="toc-n">{L["num"]}</span>
       <span class="toc-t">{L["title"]}<small dir="ltr">{L["en"].split(" · ")[0]}</small></span></a></li>''' for L in LESSONS)
     toc += '''<li class="c-ink"><a href="#exams"><span class="toc-n">7</span><span class="toc-t">الامتحانات الرسميّة ونماذج<small dir="ltr">Official exams 2015 · 2016 · 2017</small></span></a></li>
-      <li class="c-ink"><a href="#summary"><span class="toc-n">8</span><span class="toc-t">بطاقة المراجعة السريعة<small dir="ltr">Formula sheet</small></span></a></li>
-      <li class="c-ink"><a href="#answers"><span class="toc-n">9</span><span class="toc-t">الإجابات<small dir="ltr">Answer key</small></span></a></li>'''
+      <li class="c-ink"><a href="#summary"><span class="toc-n">8</span><span class="toc-t">بطاقة المراجعة السريعة<small dir="ltr">Formula sheet</small></span></a></li>'''
     return f'''
 <section class="sheet front">
   <div class="front-grid">
@@ -160,6 +171,12 @@ def exercises(L):
     return "".join(out)
 
 
+SKB = ('''<span class="skb" aria-label="Skills Builder"><svg viewBox="0 0 40 40" aria-hidden="true">
+  <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.7 2.6"/>
+  <circle cx="20" cy="20" r="11.5" fill="currentColor"/>
+  <path d="M20 12.5a5 5 0 0 0-3 9c.6.5.9 1 .9 1.8v.4h4.2v-.4c0-.8.3-1.3.9-1.8a5 5 0 0 0-3-9zM18.3 26.2h3.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+</svg><span class="skb-t"><b dir="ltr">SKILLS BUILDER</b><small>بناء المهارات</small></span></span>''')
+
 STEPS = [("أفهم المسألة", "Understand"), ("أخطّط للحلّ", "Plan"), ("أنفّذ", "Solve"), ("أتحقّق", "Check")]
 PROMPTS = ["ما المعطى؟ ما المطلوب؟", "ما القاعدة أو المعادلة التي سأستعملها؟", "أكتب الحلّ خطوة بخطوة:", "هل الجواب منطقيّ؟ أعوّض وأتحقّق:"]
 
@@ -169,15 +186,33 @@ def skills(L):
     strip = "".join(f'<li><b>{i + 1}</b><span>{a}</span><small dir="ltr">{e}</small></li>' for i, (a, e) in enumerate(STEPS))
     model = "".join(f'<li><span class="sk-k"><b>{i + 1}</b>{STEPS[i][0]}</span><p>{t}</p></li>'
                     for i, t in enumerate(sk["model"]["steps"]))
-    prac = "".join(f'''<article class="sk-p"><header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
+    prac = "".join(f'''<article class="sk-p">{SKB}<header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
       <ol class="sk-lines">{"".join(f'<li><span class="sk-k"><b>{j + 1}</b>{STEPS[j][0]}</span><em>{PROMPTS[j]}</em><i></i></li>' for j in range(4))}</ol>
     </article>''' for i, ex in enumerate(sk["practice"]))
     return f'''<div class="skills">
   <ol class="sk-strip">{strip}</ol>
-  <article class="sk-model"><header><span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
+  <article class="sk-model"><header>{SKB}<span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
   <h4 class="sk-your">دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
   {prac}
 </div>'''
+
+
+SEL_KIND = {"coop": ("users", "تعاون", "Cooperation"), "reflect": ("mirror", "التأمّل والتفكّر", "Reflection"),
+            "self": ("compass", "الوعي وإدارة الذات", "Self-awareness & management"), "comm": ("chat", "مهارات التواصل", "Relationship skills"),
+            "decide": ("scale", "اتخاذ القرار المسؤول", "Responsible decision-making"), "social": ("globe", "الوعي الاجتماعي", "Social awareness")}
+
+
+def sel(L):
+    cards = []
+    for a in L["sel"]:
+        ic, name, en = SEL_KIND[a["kind"]]
+        scale = ('<div class="sel-scale"><span>أقلّ ثقة</span>' + "".join(f"<i>{k}</i>" for k in range(1, 6)) + '<span>واثق جدًّا</span></div>') if a["scale"] else ""
+        lines = '<div class="sel-lines">' + "<i></i>" * a["lines"] + "</div>" if a["lines"] else ""
+        cards.append(f'''<article class="sel-card sel-{a["kind"]}">
+  <header><span class="ico">{ICON[ic]}</span><div><span class="sel-k">{name}<small dir="ltr">{en}</small></span><h4>{a["title"]}</h4></div><span class="sel-fmt">{a["fmt"]}</span></header>
+  <p>{a["body"]}</p>{scale}{lines}
+</article>''')
+    return f'<div class="sel-grid">{"".join(cards)}</div>'
 
 
 def tf_items(L):
@@ -227,12 +262,15 @@ def lesson(L):
   <p class="instr">{INSTR[L["id"]]}</p>
   {exercises(L)}
 
-  <h3 class="h-part"><span>5</span>بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
+  <h3 class="h-part"><span>5</span>{SKB}بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
   {skills(L)}
 
   <h3 class="h-part"><span>6</span>صح أم خطأ؟</h3>
-  <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة. (الأجوبة في آخر الكتاب)</p>
+  <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة.</p>
   <ol class="tf">{tf_items(L)}</ol>
+
+  <h3 class="h-part"><span>7</span>التعلّم الاجتماعي العاطفي: أنشطة<small dir="ltr">Social-Emotional Learning · SEL</small></h3>
+  {sel(L)}
 
   <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
     <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
@@ -270,7 +308,6 @@ def exams():
     <dl><div><dt>المدّة</dt><dd>ساعة ونصف</dd></div><div><dt>التوزيع</dt><dd>5 علامات / سؤال</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
   </header>
   <ol class="eqs">{"".join(qs)}</ol>
-  <p class="exam-foot">الإجابات في آخر الكتاب ← <a href="#ans-{X["id"]}">{X["title"]}</a></p>
 </section>''')
     return "".join(out)
 
@@ -311,10 +348,10 @@ def answers():
         out.append(f'<div class="ans c-ink" id="ans-{X["id"]}"><h3><b>✓</b>{X["title"]}</h3><ol>{"".join(items)}</ol></div>')
     return f'''
 <section class="sheet answers" id="answers">
-  <p class="eyebrow">صحّح نفسك</p>
-  <h2 class="h-big">الإجابات</h2>
-  <p class="prose-p">الإجابات النهائيّة لكل التمارين. الحلول المفصّلة لأسئلة الامتحانات الرسميّة موجودة في «أمثلة محلولة» داخل الدروس
-  (ابحث عن الشارة <span class="tag">امتحان</span>).</p>
+  <p class="eyebrow">للمعلّم فقط</p>
+  <h2 class="h-big">دليل الإجابات</h2>
+  <p class="prose-p">الإجابات النهائيّة لكل تمارين كتاب «رياضيات التكميليّة المهنيّة» — إعداد المعلّمَين حسين زعرور ومحمد عبدالله.
+  الحلول المفصّلة لأسئلة الامتحانات الرسميّة موجودة في «أمثلة محلولة» داخل الدروس.</p>
   <div class="ans-grid">{"".join(out)}</div>
 </section>'''
 
@@ -343,8 +380,13 @@ def main():
         print("answers failed verification:", bad); sys.exit(1)
     print(f"verified {n} answers")
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    body = cover() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary() + answers()
-    html = f'''<title>رياضيات التكميلية المهنية</title>
+    book = cover() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary()
+    page(css, "رياضيات التكميلية المهنية", book, "index.html")
+    page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
+
+
+def page(css, title, body, out):
+    html = f'''<title>{title}</title>
 <meta name="description" content="كتاب رياضيات بالعربيّة: شرح، أمثلة، تطبيقات، بناء المهارات وتمارين متدرّجة">
 <style>
 {font_css()}
@@ -358,7 +400,7 @@ def main():
 '''
     src = os.path.join(HERE, "book.src.html")
     open(src, "w", encoding="utf-8").write(html)
-    subprocess.run(["node", os.path.join(HERE, "render.js"), src, os.path.join(HERE, "index.html")], check=True)
+    subprocess.run(["node", os.path.join(HERE, "render.js"), src, os.path.join(HERE, out)], check=True)
 
 
 if __name__ == "__main__":
