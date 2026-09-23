@@ -54,6 +54,15 @@ def run():
                 n += 1
                 if not check(it["chk"]):
                     bad.append((L["id"], "quiz", qi + 1, it["chk"]))
+        extra = [t for t in (L["intro"]["recall"] if "intro" in L else [])]
+        extra = [(q, a, c) for q, a, c in extra]
+        for grp in ("support", "core", "enrich"):
+            extra += [(t["q"], t["a"], t["chk"]) for t in L.get("diff", {}).get(grp, [])]
+        for q_, a_, c_ in extra:
+            for c in (c_ if isinstance(c_, list) else [c_]):
+                n += 1
+                if not check(c):
+                    bad.append((L["id"], "intro/diff", q_[:30], c))
         for i, q in enumerate(L.get("mcq", []) + L.get("cards", [])):
             n += 1
             if q["expr"]:

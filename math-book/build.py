@@ -8,8 +8,9 @@ from illustrations import FIGS
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGES_FILE = os.path.join(HERE, "pages.json")
 PAGES = json.load(open(PAGES_FILE)) if os.path.exists(PAGES_FILE) else {}
-PARTS = ["الشرح", "أمثلة محلولة", "تطبيقات من المطبخ والمطعم", "تمارين", "بناء المهارات: خطوات حلّ المسألة",
-         "صح أم خطأ؟", "تقييم إضافي", "التعلّم الاجتماعي العاطفي", "سؤال بحث", "نموذج امتحان الدرس مع الحلّ"]
+PARTS = ["تمهيد", "الشرح", "أمثلة محلولة", "تطبيقات من المطبخ والمطعم", "أنشطة ووسائل تعليميّة", "تمارين",
+         "مهامّ متمايزة حسب المستوى", "بناء المهارات: خطوات حلّ المسألة", "صح أم خطأ؟", "تقييم إضافي",
+         "التعلّم الاجتماعي العاطفي", "سؤال بحث", "نموذج امتحان الدرس مع الحلّ"]
 
 
 PART_EMO = {1: "📖", 2: "✍️", 3: "👨‍🍳", 4: "📝", 5: "🧩", 6: "✅", 7: "🎯", 8: "🤝", 9: "🔍", 10: "🏆"}
@@ -24,7 +25,7 @@ def emo(e):
 
 def stk(e, cls=""):
     """A large decorative emoji 'sticker' placed beside a question or in empty space."""
-    return f'<span class="stk {cls}" aria-hidden="true">{e}</span>'
+    return ""
 
 
 def mk(key):
@@ -345,6 +346,42 @@ def research(L):
 </aside>'''
 
 
+def intro(L):
+    it = L["intro"]
+    rec = "".join(f'<li><span class="q-n">{i + 1}</span><p>{q}</p><i></i></li>' for i, (q, _, _) in enumerate(it["recall"]))
+    return f'''<div class="intro">
+  <article class="intro-hook"><span class="rs-k">موقف للتفكير</span><p>{it["hook"]}</p><div class="sel-lines"><i></i></div></article>
+  <article class="intro-recall"><span class="rs-k">ماذا أعرف مسبقًا؟</span><ol>{rec}</ol></article>
+  <p class="intro-idea"><b>فكرة الدرس:</b> {it["idea"]}</p>
+</div>'''
+
+
+def activities(L):
+    cards = []
+    for i, a in enumerate(L["activities"]):
+        aids = "".join(f"<li>{x}</li>" for x in a["aids"])
+        steps = "".join(f"<li>{x}</li>" for x in a["steps"])
+        cards.append(f'''<article class="act">
+  <header><span class="act-n">نشاط {i + 1}</span><h4>{a["title"]}</h4></header>
+  <div class="act-aids"><span>الوسائل</span><ul>{aids}</ul></div>
+  <ol class="act-steps">{steps}</ol>
+  <p class="act-goal"><b>الهدف:</b> {a["goal"]}</p>
+</article>''')
+    return f'<div class="acts">{"".join(cards)}</div>'
+
+
+DIFF = [("support", 1, "دعم", "لمن يحتاج إلى تثبيت الأساس"), ("core", 2, "أساسيّ", "المستوى المطلوب من الجميع"), ("enrich", 3, "إثراء", "للمتميّزين")]
+
+
+def differentiation(L):
+    cols = []
+    for key, n, name, desc in DIFF:
+        tasks = "".join(f'<li><span class="q-n">{i + 1}</span><div>{t["q"]}</div></li>' for i, t in enumerate(L["diff"][key]))
+        cols.append(f'''<article class="dcol dcol-{n}"><header>{meter(n)}<h4>{name}</h4><small>{desc}</small></header><ol>{tasks}</ol></article>''')
+    return f'''<p class="instr">يوزّع المعلّم المهامّ على المجموعات حسب مستوى كلّ طالب، ويستطيع الطالب أن ينتقل إلى المستوى التالي متى أتقن مستواه.</p>
+<div class="diff">{"".join(cols)}</div>'''
+
+
 def tf_items(L):
     return "".join(f'''<li><span class="q-n">{i + 1}</span><p>{t["s"]}</p>
       <span class="tf-box"><i></i>صح</span><span class="tf-box"><i></i>خطأ</span></li>''' for i, t in enumerate(L["tf"]))
@@ -355,11 +392,12 @@ def self_rows(L):
 
 
 def lesson(L):
-    html = _lesson(L)
+    counter = iter(range(1, 100))
+    html = re.sub(r'(<h3 class="h-part(?: quiz-part)?"><span>)\d+(</span>)', lambda m_: f"{m_.group(1)}{next(counter)}{m_.group(2)}", _lesson(L))
     html = html.replace('<p class="eyebrow">الدرس', f'<p class="eyebrow">{mk(L["id"])}الدرس', 1)
     html = html.replace(f'الدرس {L["num"]}</p>', f'الدرس {L["num"]} {emo(LESSON_EMO[L["id"]])}</p>', 1)
     return re.sub(r'<h3 class="h-part( quiz-part)?"><span>(\d+)</span>',
-                  lambda m_: f'<h3 class="h-part{m_.group(1) or ""}">{mk(L["id"] + "-" + m_.group(2))}<span>{m_.group(2)}</span>{emo(PART_EMO[int(m_.group(2))])}', html)
+                  lambda m_: f'<h3 class="h-part{m_.group(1) or ""}">{mk(L["id"] + "-" + m_.group(2))}<span>{m_.group(2)}</span>', html)
 
 
 def _lesson(L):
@@ -384,9 +422,12 @@ def _lesson(L):
       <div class="tbl"><table><thead><tr><th>عربي</th><th>English</th><th>Français</th></tr></thead><tbody>{words}</tbody></table></div></div>
   </div>
 
+  <h3 class="h-part"><span>0</span>تمهيد<small dir="ltr">Introduction</small></h3>
+  {intro(L)}
+
   <figure class="lesson-fig">{FIGS[L["id"]][0]()}<figcaption>{FIGS[L["id"]][1]}</figcaption></figure>
 
-  <h3 class="h-part"><span>1</span>الشرح</h3>
+  <h3 class="h-part"><span>0</span>الشرح</h3>
   <div class="prose">{L["explain"]}</div>
   {rules_block(L)}
   {sq}
@@ -398,9 +439,15 @@ def _lesson(L):
   <h3 class="h-part"><span>3</span>تطبيقات من المطبخ والمطعم</h3>
   <div class="apps">{apps}</div>
 
+  <h3 class="h-part"><span>0</span>أنشطة ووسائل تعليميّة<small dir="ltr">Activities &amp; teaching aids</small></h3>
+  {activities(L)}
+
   <h3 class="h-part"><span>4</span>تمارين</h3>
   <p class="instr">{INSTR[L["id"]]}</p>
   {exercises(L)}
+
+  <div class="keep"><h3 class="h-part"><span>0</span>مهامّ متمايزة حسب المستوى<small dir="ltr">Differentiation</small></h3>
+  {differentiation(L)}</div>
 
   <h3 class="h-part"><span>5</span>{SKB}بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
   {skills(L)}
@@ -484,10 +531,15 @@ def answers():
                 hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
                 items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
         sk = "".join(f'<li><span class="a-n">{i + 1}</span><div>{ex["a"]}</div></li>' for i, ex in enumerate(L["skills"]["practice"]))
+        rc = "".join(f'<li><span class="a-n">{i + 1}</span><div>{a}</div></li>' for i, (_, a, _) in enumerate(L["intro"]["recall"]))
+        df = "".join(f'<li><span class="a-n">{name[0]}{i + 1}</span><div>{t["a"]}</div></li>'
+                     for key, _, name, _ in DIFF for i, t in enumerate(L["diff"][key]))
         mc = "".join(f'<li><span class="a-n">{i + 1}</span><div><b>{AR_LETTERS[q["ans"]]})</b></div></li>' for i, q in enumerate(L["mcq"]))
         tf = "".join(f'''<li><span class="a-n">{i + 1}</span><div><b class="{"ok" if t["truth"] else "no"}">{"صح" if t["truth"] else "خطأ"}</b>{(" — " + t["fix"]) if t["fix"] else ""}</div></li>'''
                      for i, t in enumerate(L["tf"]))
         out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol>'
+                   f'<p class="ans-sub">تمهيد: ماذا أعرف مسبقًا؟</p><ol>{rc}</ol>'
+                   f'<p class="ans-sub">المهامّ المتمايزة (د = دعم، أ = أساسيّ، إ = إثراء)</p><ol>{df}</ol>'
                    f'<p class="ans-sub">بناء المهارات</p><ol>{sk}</ol>'
                    f'<p class="ans-sub">اختيار من متعدّد</p><ol class="ans-mc">{mc}</ol>'
                    f'<p class="ans-sub">صح أم خطأ؟</p><ol>{tf}</ol></div>')
