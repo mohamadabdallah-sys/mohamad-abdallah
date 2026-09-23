@@ -13,7 +13,7 @@ It uses English digits and `x`, `y` throughout.
 Six lessons. Each lesson has an explanation, rule cards, common mistakes, worked examples, kitchen and restaurant
 applications, exercises at four levels (easy, medium, hard, challenge ★), a "Skills Builder" (problem-solving steps: understand, plan, solve, check), social-emotional learning activities (cooperation, reflection, self-awareness & self-management…), extra assessment (multiple choice + an open question), a research question, a lesson exam with a full solution at the end of every lesson, a "True or False?" set on common
 mistakes and a "Rate yourself" checklist. The cover carries the Al-Mabarrat Association logo (`assets/mabarrat-logo.jpg`).
-The book ends with:
+The book also has 36 cut-out MCQ review cards, with the answer printed upside down. It ends with:
 - the 3 official exams
 - 6 mock exams in the same format
 - a formula sheet

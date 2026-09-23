@@ -54,7 +54,7 @@ def run():
                 n += 1
                 if not check(it["chk"]):
                     bad.append((L["id"], "quiz", qi + 1, it["chk"]))
-        for i, q in enumerate(L.get("mcq", [])):
+        for i, q in enumerate(L.get("mcq", []) + L.get("cards", [])):
             n += 1
             if q["expr"]:
                 ok = [check(("eq", q["expr"], o)) for o in q["syms"]]

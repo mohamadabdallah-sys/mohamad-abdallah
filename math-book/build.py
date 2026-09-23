@@ -12,6 +12,16 @@ PARTS = ["الشرح", "أمثلة محلولة", "تطبيقات من المط�
          "صح أم خطأ؟", "تقييم إضافي", "التعلّم الاجتماعي العاطفي", "سؤال بحث", "نموذج امتحان الدرس مع الحلّ"]
 
 
+PART_EMO = {1: "📖", 2: "✍️", 3: "👨‍🍳", 4: "📝", 5: "🧩", 6: "✅", 7: "🎯", 8: "🤝", 9: "🔍", 10: "🏆"}
+LESSON_EMO = {"expand": "🔓", "factor": "🧱", "poly": "📈", "roots": "🌱", "rational": "⚖️", "systems": "🔗"}
+LEVEL_EMO = {1: "🟢", 2: "🟡", 3: "🔴", 4: "⭐"}
+SEL_EMO = {"coop": "🤝", "reflect": "🪞", "self": "🧭", "comm": "💬", "decide": "⚖️", "social": "🌍"}
+
+
+def emo(e):
+    return f'<span class="emo" aria-hidden="true">{e}</span>'
+
+
 def mk(key):
     """Invisible print marker; make_pdf.py finds it in the PDF to learn the section's page."""
     return f'<em class="pgmark">@@{key}@@</em>'
@@ -99,7 +109,7 @@ def cover():
   <div class="cover-in">
     <div class="cover-glyphs" aria-hidden="true">{g}</div>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
-    <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
+    <p class="cover-sub">✨ شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
     <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
       <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
@@ -119,6 +129,7 @@ def howto():
              ("check", "تقييم إضافي", "أسئلة اختيار من متعدّد وسؤال مفتوح للتأكّد من الفهم."),
              ("book", "سؤال بحث", "مشروع بحثيّ صغير في كل درس يربط الرياضيّات بالتاريخ والحياة."),
              ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
+             ("check", "بطاقات MCQ", "36 بطاقة مراجعة للقصّ، الجواب مقلوب في أسفل كل بطاقة."),
              ("pen", "نموذج امتحان الدرس", "امتحان قصير (20 علامة) في نهاية كل درس، يليه الحلّ المفصّل."),
              ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
     cards = "".join(f'<div class="how-card"><span class="ico">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in parts)
@@ -131,7 +142,7 @@ def howto():
   <div class="front-grid">
     <div>
       <p class="credit">إعداد المعلّمَين: <b>حسين زعرور</b> و<b>محمد عبدالله</b></p>
-      <h2 class="h-sec">{mk("howto")}كيف تستعمل هذا الكتاب؟</h2>
+      <h2 class="h-sec">{mk("howto")}كيف تستعمل هذا الكتاب؟ 🧭</h2>
       <div class="how">{cards}</div>
     </div>
     <div>
@@ -140,6 +151,28 @@ def howto():
       <p class="note-small">كل الأعداد مكتوبة بالأرقام الإنكليزيّة (0 1 2 3 …) والمتغيّرات بالرمزين \\(x\\) و\\(y\\) كما في النسخة الإنكليزيّة/الفرنسيّة من الامتحان.</p>
     </div>
   </div>
+</section>'''
+
+
+def cards():
+    out = []
+    k = 0
+    for L in LESSONS:
+        for q in L["cards"]:
+            k += 1
+            opts = "".join(f'<li><i>{AR_LETTERS[j]}</i>{(o[5:] if o.startswith("html:") else m(o))}</li>' for j, o in enumerate(q["opts"]))
+            out.append(f'''<article class="card c-{L["color"]}">
+  <header>{emo(LESSON_EMO[L["id"]])}<span>الدرس {L["num"]}</span><b>{k}</b></header>
+  <p class="card-q">{q["q"]}</p>
+  <ol class="card-o">{opts}</ol>
+  <footer><span class="flip">🙃 الجواب: {AR_LETTERS[q["ans"]]})</span></footer>
+</article>''')
+    return f'''
+<section class="sheet cards" id="cards">
+  <p class="eyebrow">{mk("cards")}MCQ Cards</p>
+  <h2 class="h-big">✂️ بطاقات المراجعة: اختيار من متعدّد</h2>
+  <p class="prose-p">قُصّ البطاقات على الخطّ المتقطّع ✂️، واختبر نفسك أو زميلك 🤝. الجواب مكتوب مقلوبًا في أسفل كل بطاقة: اقلب البطاقة بعد أن تختار 🙃.</p>
+  <div class="card-grid">{"".join(out)}</div>
 </section>'''
 
 
@@ -153,14 +186,15 @@ def index_page():
   <ol>{rows}</ol></div>''')
     ex = "".join(f'<li><a href="#{X["id"]}"><span>{X["title"]}</span><i></i><b>{pg(X["id"])}</b></a></li>' for X in EXAMS)
     blocks.append(f'''<div class="ix-block c-ink">
-  <a class="ix-h" href="#exams"><span class="toc-n">7</span><span class="ix-t">الامتحانات الرسميّة ونماذج التدريب</span><i></i><b>{pg("exams")}</b></a>
+  <a class="ix-h" href="#cards"><span class="toc-n">7</span><span class="ix-t">بطاقات المراجعة MCQ ✂️</span><i></i><b>{pg("cards")}</b></a>
+  <a class="ix-h ix-h2" href="#exams"><span class="toc-n">8</span><span class="ix-t">الامتحانات الرسميّة ونماذج التدريب</span><i></i><b>{pg("exams")}</b></a>
   <ol>{ex}</ol>
-  <a class="ix-h ix-h2" href="#summary"><span class="toc-n">8</span><span class="ix-t">بطاقة المراجعة السريعة</span><i></i><b>{pg("summary")}</b></a>
+  <a class="ix-h ix-h2" href="#summary"><span class="toc-n">9</span><span class="ix-t">بطاقة المراجعة السريعة</span><i></i><b>{pg("summary")}</b></a>
 </div>''')
     return f'''
 <section class="sheet index" id="index">
   <p class="eyebrow">{mk("index")}Contents</p>
-  <h2 class="h-big">الفهرس</h2>
+  <h2 class="h-big">📚 الفهرس</h2>
   <p class="ix-front"><a href="#top"><span>كيف تستعمل هذا الكتاب؟</span><i></i><b>{pg("howto")}</b></a></p>
   <div class="ix-grid">{"".join(blocks)}</div>
 </section>'''
@@ -182,7 +216,7 @@ def example_card(i, ex):
     steps = "".join(f'''<li><div class="st-m">{dm(t)}</div>{f'<p class="st-n">{n}</p>' if n else ""}</li>'''
                     for t, n in ex["steps"])
     return f'''<article class="ex">
-  <header><span class="ex-n">مثال {i}</span>{tag}</header>
+  <header><span class="ex-n">✏️ مثال {i}</span>{tag}</header>
   <div class="ex-q">{dm(ex["q"])}</div>
   <ol class="steps">{steps}</ol>
 </article>'''
@@ -210,7 +244,7 @@ def exercises(L):
         if not L.get(key):
             continue
         out.append(f'''<div class="lvl lvl-{n}">
-  <div class="lvl-h">{meter(n)}<h4>المستوى {n} · {name}</h4><span>{desc}</span></div>
+  <div class="lvl-h">{meter(n)}<h4>{emo(LEVEL_EMO[n])} المستوى {n} · {name}</h4><span>{desc}</span></div>
   <ol class="qs">{"".join(items)}</ol>
 </div>''')
     return "".join(out)
@@ -232,8 +266,8 @@ def skills(L):
     </article>''' for i, ex in enumerate(sk["practice"]))
     return f'''<div class="skills">
   <ol class="sk-strip">{strip}</ol>
-  <article class="sk-model"><header>{SKB}<span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
-  <h4 class="sk-your">دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
+  <article class="sk-model"><header>{SKB}<span class="tag">✅ مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
+  <h4 class="sk-your">💪 دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
   {prac}
 </div>'''
 
@@ -250,7 +284,7 @@ def sel(L):
         scale = ('<div class="sel-scale"><span>أقلّ ثقة</span>' + "".join(f"<i>{k}</i>" for k in range(1, 6)) + '<span>واثق جدًّا</span></div>') if a["scale"] else ""
         lines = '<div class="sel-lines">' + "<i></i>" * a["lines"] + "</div>" if a["lines"] else ""
         cards.append(f'''<article class="sel-card sel-{a["kind"]}">
-  <header><span class="ico">{ICON[ic]}</span><div><span class="sel-k">{name}<small dir="ltr">{en}</small></span><h4>{a["title"]}</h4></div><span class="sel-fmt">{a["fmt"]}</span></header>
+  <header><span class="ico">{ICON[ic]}</span><div><span class="sel-k">{emo(SEL_EMO[a["kind"]])} {name}<small dir="ltr">{en}</small></span><h4>{a["title"]}</h4></div><span class="sel-fmt">{a["fmt"]}</span></header>
   <p>{a["body"]}</p>{scale}{lines}
 </article>''')
     return f'<div class="sel-grid">{"".join(cards)}</div>'
@@ -274,13 +308,13 @@ def quiz(L):
         sols.append(f'''<article class="qsol"><header><span class="eq-r">{ROMAN[qi]}</span><b>{prompt}</b></header>{"".join(parts)}</article>''')
     return f'''<div class="lquiz">
   <header class="exam-h">
-    <div><span class="badge">نموذج امتحان</span><h2>امتحان الدرس {L["num"]}: {L["title"]}</h2><p>أجب عن الأسئلة التالية قبل أن تنظر إلى الحلّ.</p></div>
+    <div><span class="badge">⏱️ نموذج امتحان</span><h2>امتحان الدرس {L["num"]}: {L["title"]}</h2><p>أجب عن الأسئلة التالية قبل أن تنظر إلى الحلّ.</p></div>
     <dl><div><dt>المدّة</dt><dd>30 دقيقة</dd></div><div><dt>العلامة</dt><dd>20</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
   </header>
   <ol class="eqs">{"".join(qs)}</ol>
 </div>
 <div class="lquiz-sol">
-  <h3 class="sol-h"><span class="ico">{ICON["check"]}</span>الحلّ المفصّل لنموذج الامتحان</h3>
+  <h3 class="sol-h"><span class="ico">{ICON["check"]}</span>الحلّ المفصّل لنموذج الامتحان 💡</h3>
   {"".join(sols)}
 </div>'''
 
@@ -293,13 +327,13 @@ def assess(L):
     return f'''<div class="assess">
   <p class="instr">اختر الإجابة الصحيحة وضع دائرة حول حرفها:</p>
   <ol class="mcq">{"".join(items)}</ol>
-  <div class="open-q"><span class="tag">سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
+  <div class="open-q"><span class="tag">💭 سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
 </div>'''
 
 
 def research(L):
     r = L["research"]
-    return f'''<aside class="research"><header><span class="ico">{ICON["globe"]}</span><div><span class="rs-k">سؤال بحث</span><h4>{r["title"]}</h4></div></header>
+    return f'''<aside class="research"><header><span class="ico">{ICON["globe"]}</span><div><span class="rs-k">🔍 سؤال بحث</span><h4>{r["title"]}</h4></div></header>
   <p>{r["q"]}</p>
   <dl><div><dt>مصادر مقترحة</dt><dd>مكتبة المدرسة، مقابلة مع صاحب مهنة، موقع تعليميّ موثوق</dd></div><div><dt>المنتَج المطلوب</dt><dd>{r["out"]}</dd></div></dl>
 </aside>'''
@@ -317,8 +351,9 @@ def self_rows(L):
 def lesson(L):
     html = _lesson(L)
     html = html.replace('<p class="eyebrow">الدرس', f'<p class="eyebrow">{mk(L["id"])}الدرس', 1)
+    html = html.replace(f'الدرس {L["num"]}</p>', f'الدرس {L["num"]} {emo(LESSON_EMO[L["id"]])}</p>', 1)
     return re.sub(r'<h3 class="h-part( quiz-part)?"><span>(\d+)</span>',
-                  lambda m_: f'<h3 class="h-part{m_.group(1) or ""}">{mk(L["id"] + "-" + m_.group(2))}<span>{m_.group(2)}</span>', html)
+                  lambda m_: f'<h3 class="h-part{m_.group(1) or ""}">{mk(L["id"] + "-" + m_.group(2))}<span>{m_.group(2)}</span>{emo(PART_EMO[int(m_.group(2))])}', html)
 
 
 def _lesson(L):
@@ -349,7 +384,7 @@ def _lesson(L):
   <div class="prose">{L["explain"]}</div>
   {rules_block(L)}
   {sq}
-  <aside class="warn"><span class="ico">{ICON["warn"]}</span><div><b>انتبه! أخطاء شائعة</b><p>{L["warn"]}</p></div></aside>
+  <aside class="warn"><span class="ico">{ICON["warn"]}</span><div><b>⚠️ انتبه! أخطاء شائعة</b><p>{L["warn"]}</p></div></aside>
 
   <h3 class="h-part"><span>2</span>أمثلة محلولة</h3>
   <div class="exs">{exs}</div>
@@ -377,7 +412,7 @@ def _lesson(L):
   <h3 class="h-part"><span>9</span>سؤال بحث<small dir="ltr">Research</small></h3>
   {research(L)}
 
-  <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
+  <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي 🌟</h4>
     <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
 
   <h3 class="h-part quiz-part"><span>10</span>نموذج امتحان الدرس مع الحلّ</h3>
@@ -388,7 +423,7 @@ def _lesson(L):
 def exams():
     out = ['''<section class="sheet exams-intro" id="exams">
   <p class="eyebrow">''' + mk("exams") + '''الفصل الأخير</p>
-  <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
+  <h2 class="h-big">🏆 الامتحانات الرسميّة ونماذج للتدريب</h2>
   <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ستّة نماذج جديدة على النمط نفسه تمامًا:
   أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
   حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
@@ -428,7 +463,7 @@ def summary():
     return f'''
 <section class="sheet summary" id="summary">
   <p class="eyebrow">{mk("summary")}قبل الامتحان</p>
-  <h2 class="h-big">بطاقة المراجعة السريعة</h2>
+  <h2 class="h-big">📌 بطاقة المراجعة السريعة</h2>
   <div class="sum-grid">{"".join(blocks)}</div>
 </section>'''
 
@@ -490,7 +525,7 @@ def main():
         print("answers failed verification:", bad); sys.exit(1)
     print(f"verified {n} answers")
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    book = cover() + index_page() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary()
+    book = cover() + index_page() + howto() + "".join(lesson(L) for L in LESSONS) + cards() + exams() + summary()
     page(css, "رياضيات التكميلية المهنية", book, "index.html")
     page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
 

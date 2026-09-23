@@ -58,7 +58,7 @@ def frame(page, number, color, logo):
 
 def section_color(keys_by_page, n_pages):
     """Colour of each body page: the colour of the lesson it belongs to, else green."""
-    starts = sorted((p, k) for k, p in keys_by_page.items() if k in LESSON_COLOR or k in ("exams", "summary", "howto", "index"))
+    starts = sorted((p, k) for k, p in keys_by_page.items() if k in LESSON_COLOR or k in ("cards", "exams", "summary", "howto", "index"))
     out, cur = [], GREEN
     for i in range(n_pages):
         for p, k in starts:
@@ -102,6 +102,7 @@ def main():
     for L in content.LESSONS:
         titles.append((1, f'الدرس {L["num"]}: {L["title"]}', L["id"]))
         titles += [(2, p, f'{L["id"]}-{i + 1}') for i, p in enumerate(__import__("build").PARTS)]
+    titles.append((1, "بطاقات المراجعة MCQ", "cards"))
     titles.append((1, "الامتحانات الرسميّة ونماذج التدريب", "exams"))
     titles += [(2, X["title"], X["id"]) for X in content.EXAMS]
     titles.append((1, "بطاقة المراجعة السريعة", "summary"))
