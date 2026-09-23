@@ -54,6 +54,11 @@ def meter(n):
         n, "".join('<i class="%s"></i>' % ("on" if k < n else "") for k in range(3)))
 
 
+def ps_logo():
+    data = open(os.path.join(HERE, "assets", "problem-solving.png"), "rb").read()
+    return "data:image/png;base64," + base64.b64encode(data).decode()
+
+
 def logo():
     data = open(os.path.join(HERE, "assets", "mabarrat-logo.jpg"), "rb").read()
     return "data:image/jpeg;base64," + base64.b64encode(data).decode()
@@ -98,6 +103,7 @@ def howto():
              ("heart", "التعلّم الاجتماعي العاطفي", "أنشطة للتعاون والتأمّل والوعي بالذات وإدارتها في كل درس."),
              ("bulb", "بناء المهارات", "أربع خطوات لحلّ أيّ مسألة: أفهم، أخطّط، أنفّذ، أتحقّق."),
              ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
+             ("pen", "نموذج امتحان الدرس", "امتحان قصير (20 علامة) في نهاية كل درس، يليه الحلّ المفصّل."),
              ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
     cards = "".join(f'<div class="how-card"><span class="ico">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in parts)
     toc = "".join(f'''<li class="c-{L["color"]}"><a href="#{L["id"]}"><span class="toc-n">{L["num"]}</span>
@@ -171,11 +177,7 @@ def exercises(L):
     return "".join(out)
 
 
-SKB = ('''<span class="skb" aria-label="Skills Builder"><svg viewBox="0 0 40 40" aria-hidden="true">
-  <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.7 2.6"/>
-  <circle cx="20" cy="20" r="11.5" fill="currentColor"/>
-  <path d="M20 12.5a5 5 0 0 0-3 9c.6.5.9 1 .9 1.8v.4h4.2v-.4c0-.8.3-1.3.9-1.8a5 5 0 0 0-3-9zM18.3 26.2h3.4" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
-</svg><span class="skb-t"><b dir="ltr">SKILLS BUILDER</b><small>بناء المهارات</small></span></span>''')
+SKB = '<span class="skb" role="img" aria-label="Problem Solving · حلّ المشكلات"></span>'
 
 STEPS = [("أفهم المسألة", "Understand"), ("أخطّط للحلّ", "Plan"), ("أنفّذ", "Solve"), ("أتحقّق", "Check")]
 PROMPTS = ["ما المعطى؟ ما المطلوب؟", "ما القاعدة أو المعادلة التي سأستعملها؟", "أكتب الحلّ خطوة بخطوة:", "هل الجواب منطقيّ؟ أعوّض وأتحقّق:"]
@@ -213,6 +215,35 @@ def sel(L):
   <p>{a["body"]}</p>{scale}{lines}
 </article>''')
     return f'<div class="sel-grid">{"".join(cards)}</div>'
+
+
+def quiz(L):
+    qs, sols = [], []
+    for qi, (prompt, items) in enumerate(L["quiz"]):
+        def qhtml(it):
+            return f'<p>{it["q"][5:]}</p>' if it["q"].startswith("html:") else dm(it["q"])
+        if len(items) == 1:
+            body = f'<div class="eq-one">{qhtml(items[0])}</div>'
+        else:
+            body = '<ol class="eq-items">' + "".join(f'<li><span>{AR_LETTERS[i]})</span>{qhtml(it)}</li>' for i, it in enumerate(items)) + "</ol>"
+        qs.append(f'''<li class="eq"><div class="eq-h"><span class="eq-r">{ROMAN[qi]}</span><b>{prompt}</b><span class="pts">5 pts</span></div>{body}</li>''')
+        parts = []
+        for i, it in enumerate(items):
+            steps = "".join(f'''<li><div class="st-m">{dm(t)}</div>{f'<p class="st-n">{n}</p>' if n else ""}</li>''' for t, n in it["steps"])
+            lab = f'<span class="qs-lab">{AR_LETTERS[i]})</span>' if len(items) > 1 else ""
+            parts.append(f'<div class="qsol-part">{lab}<ol class="steps">{steps}</ol></div>')
+        sols.append(f'''<article class="qsol"><header><span class="eq-r">{ROMAN[qi]}</span><b>{prompt}</b></header>{"".join(parts)}</article>''')
+    return f'''<div class="lquiz">
+  <header class="exam-h">
+    <div><span class="badge">نموذج امتحان</span><h2>امتحان الدرس {L["num"]}: {L["title"]}</h2><p>أجب عن الأسئلة التالية قبل أن تنظر إلى الحلّ.</p></div>
+    <dl><div><dt>المدّة</dt><dd>30 دقيقة</dd></div><div><dt>العلامة</dt><dd>20</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
+  </header>
+  <ol class="eqs">{"".join(qs)}</ol>
+</div>
+<div class="lquiz-sol">
+  <h3 class="sol-h"><span class="ico">{ICON["check"]}</span>الحلّ المفصّل لنموذج الامتحان</h3>
+  {"".join(sols)}
+</div>'''
 
 
 def tf_items(L):
@@ -274,6 +305,9 @@ def lesson(L):
 
   <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
     <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
+
+  <h3 class="h-part quiz-part"><span>8</span>نموذج امتحان الدرس مع الحلّ</h3>
+  {quiz(L)}
 </section>'''
 
 
@@ -390,6 +424,7 @@ def page(css, title, body, out):
 <meta name="description" content="كتاب رياضيات بالعربيّة: شرح، أمثلة، تطبيقات، بناء المهارات وتمارين متدرّجة">
 <style>
 {font_css()}
+.skb {{ background-image: url({ps_logo()}); }}
 /*KATEX_CSS*/
 {css}
 </style>

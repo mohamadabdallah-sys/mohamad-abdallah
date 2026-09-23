@@ -258,17 +258,25 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
   .sk-steps li, .sk-lines li { grid-template-columns: 1fr; }
 }
 
-/* Skills Builder badge */
-.skb { display: inline-flex; align-items: center; gap: 7px; padding: 3px 12px 3px 4px; border-radius: 99px; flex: none;
-  background: color-mix(in srgb, var(--c) 12%, var(--paper)); border: 1.5px solid var(--c); color: var(--c); vertical-align: middle; justify-self: start; }
-.skb svg { width: 30px; height: 30px; flex: none; }
-.skb-t { display: grid; line-height: 1.1; }
-.skb-t b { font-family: var(--f-display); font-size: .66rem; letter-spacing: .12em; font-weight: 700; }
-.skb-t small { font-size: .7rem; font-weight: 600; color: var(--ink); }
-.h-part .skb { margin-inline-end: 4px; }
+/* Problem Solving badge (image set inline from build.py) */
+.skb { display: inline-block; width: 64px; height: 64px; flex: none; background-position: center; background-size: contain; background-repeat: no-repeat; vertical-align: middle; justify-self: start; }
+.h-part .skb { width: 48px; height: 48px; margin-inline-end: 2px; }
 .sk-p { position: relative; }
 .sk-p > .skb { justify-self: start; }
 .sk-model > header .skb { margin-bottom: 2px; }
+
+/* Lesson exam + solution */
+.lquiz { border: 2px solid var(--c); border-radius: 12px; padding: 16px 20px; }
+.lquiz .exam-h h2 { font-size: 1.3rem; }
+.lquiz .badge { background: var(--c); }
+.lquiz-sol { margin-top: 16px; border-radius: 12px; padding: 16px 20px; background: var(--soft); display: grid; gap: 12px; }
+.sol-h { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; color: var(--c); }
+.qsol { background: var(--paper); border-radius: 10px; padding: 10px 14px; }
+.qsol > header { display: flex; align-items: baseline; gap: 10px; padding-bottom: 4px; }
+.qsol > header b { font-family: var(--f-display); }
+.qsol-part { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: start; }
+.qsol-part .steps { padding: 0 0 4px; }
+.qs-lab { font-family: var(--f-display); font-weight: 600; color: var(--c); padding-top: 10px; }
 
 /* Social-emotional learning */
 .sel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
@@ -372,6 +380,9 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
   .cover-top { padding: 22mm 18mm 4mm; }
   .cover-in { padding: 8mm 18mm 16mm; }
   .sel-card { break-inside: avoid; }
+  .quiz-part { break-before: page; }
+  .lquiz-sol { break-before: page; }
+  .qsol { break-inside: avoid; }
   .cover-glyphs .g { font-size: 4rem; }
   .cover-logo { width: 62mm; }
   .sk-model, .sk-p, .sk-strip { break-inside: avoid; }

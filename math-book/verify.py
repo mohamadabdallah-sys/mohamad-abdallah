@@ -49,6 +49,11 @@ def run():
                     n += 1
                     if not check(c):
                         bad.append((L["id"], "skills", i + 1, c))
+        for qi, (_, items) in enumerate(L.get("quiz", [])):
+            for it in items:
+                n += 1
+                if not check(it["chk"]):
+                    bad.append((L["id"], "quiz", qi + 1, it["chk"]))
         for i, t in enumerate(L.get("tf", [])):
             n += 1
             if check(t["chk"]) != t["truth"]:
