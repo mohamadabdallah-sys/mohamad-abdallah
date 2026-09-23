@@ -142,7 +142,7 @@
 
 /* ===== Base ============================================================== */
 *, *::before, *::after { box-sizing: border-box; }
-body { background: var(--ground); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.75; }
+body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.75; }
 .book { max-width: 900px; margin: 0 auto; padding-block: 28px 40px; padding-inline: 16px; display: grid; gap: 28px; }
 .book > *, .op-meta > *, .front-grid > *, .rules > *, .apps > *, .exs > *, .qs > *, .sum-grid > *, .ans-grid > *, .eq-items > *, .cover-chips > * { min-width: 0; }
 h1, h2, h3, h4 { font-family: var(--f-display); line-height: 1.3; margin: 0; text-wrap: balance; }
@@ -197,6 +197,12 @@ ol, ul { margin: 0; padding: 0; list-style: none; }
   font-family: var(--f-display); font-size: .88rem; color: #AEB9C7; }
 .cover-foot span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-inline-end: 8px; vertical-align: middle; }
 
+.authors { display: grid; gap: 2px; padding: 14px 16px; border-radius: 6px; border: 1px solid rgba(233,180,76,.45); background: rgba(233,180,76,.08); justify-self: start; }
+.authors span { font-family: var(--f-display); font-size: .78rem; letter-spacing: .04em; color: var(--gold); }
+.authors p { font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; color: #fff; }
+.authors i { font-style: normal; color: var(--gold); margin-inline: 6px; }
+.authors small { font-size: .78rem; color: #AEB9C7; text-align: right; }
+.credit { font-size: .9rem; color: var(--ink-2); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
 /* ===== Front matter ====================================================== */
 .front-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
 .toc { display: grid; gap: 6px; }
@@ -371,14 +377,13 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 }
 
 /* ===== Print (A4 book) =================================================== */
-@page { size: A4; margin: 13mm 12mm 14mm; }
-@page :first { margin: 0; }
+@page { size: A4; margin: 0; }
 @media print {
   :root { color-scheme: light; }
   body { background: #fff; font-size: 13.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .book { display: block; max-width: none; padding: 0; }
-  .sheet { box-shadow: none; border-radius: 0; padding: 0; break-before: page; }
-  .cover { break-before: auto; height: 296mm; break-after: page; min-height: 0; padding: 22mm 18mm; border-radius: 0; }
+  .sheet { box-shadow: none; border-radius: 0; padding: 13mm 12mm 14mm; break-before: page; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .cover { break-before: auto; height: 297mm; overflow: hidden; break-after: page; min-height: 0; padding: 22mm 18mm; border-radius: 0; }
   .cover-glyphs .g { font-size: 4rem; }
   .cover-in { padding-top: 0; }
   .ex, .app, .rule, .lvl-h, .qs li, .eq, .sum, .ans li, .warn, .steps li, .exam-h { break-inside: avoid; }
@@ -444,6 +449,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
     <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، وتمارين متدرّجة من السهل إلى الصعب — وفق أسئلة الامتحانات الرسميّة <b>2015 · 2016 · 2017</b>.</p>
     <ol class="cover-chips"><li class="c-teal"><b>1</b>النشر والاختزال</li><li class="c-saffron"><b>2</b>التحليل إلى عوامل</li><li class="c-plum"><b>3</b>كثيرة الحدود P(x): نشر وتحليل</li><li class="c-blue"><b>4</b>الجذور التربيعية</li><li class="c-green"><b>5</b>إنطاق المقام</li><li class="c-coral"><b>6</b>حلّ نظام معادلتين بمجهولين</li></ol>
+    <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
       <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
     </div>
@@ -452,6 +458,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <section class="sheet front">
   <div class="front-grid">
     <div>
+      <p class="credit">إعداد المعلّمَين: <b>حسين زعرور</b> و<b>محمد عبدالله</b></p>
       <h2 class="h-sec">المحتويات</h2>
       <ol class="toc"><li class="c-teal"><a href="#expand"><span class="toc-n">1</span>
       <span class="toc-t">النشر والاختزال<small dir="ltr">Expand and reduce</small></span></a></li><li class="c-saffron"><a href="#factor"><span class="toc-n">2</span>
@@ -5120,5 +5127,5 @@ s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
 c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
 M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span></span></span></span></div></li></ol></div></div>
 </section>
-<footer class="colophon">رياضيات التكميليّة المهنيّة · أمين خدمة بالمطعم · طاهٍ · حلواني</footer>
+<footer class="colophon">رياضيات التكميليّة المهنيّة · إعداد المعلّمَين حسين زعرور ومحمد عبدالله</footer>
 </div>

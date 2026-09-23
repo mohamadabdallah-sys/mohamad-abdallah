@@ -58,6 +58,7 @@ def cover():
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
     <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، وتمارين متدرّجة من السهل إلى الصعب — وفق أسئلة الامتحانات الرسميّة <b>2015 · 2016 · 2017</b>.</p>
     <ol class="cover-chips">{chips}</ol>
+    <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
       <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
     </div>
@@ -81,6 +82,7 @@ def howto():
 <section class="sheet front">
   <div class="front-grid">
     <div>
+      <p class="credit">إعداد المعلّمَين: <b>حسين زعرور</b> و<b>محمد عبدالله</b></p>
       <h2 class="h-sec">المحتويات</h2>
       <ol class="toc">{toc}</ol>
     </div>
@@ -290,7 +292,7 @@ def main():
 </style>
 <div class="book" dir="rtl" lang="ar">
 {body}
-<footer class="colophon">رياضيات التكميليّة المهنيّة · أمين خدمة بالمطعم · طاهٍ · حلواني</footer>
+<footer class="colophon">رياضيات التكميليّة المهنيّة · إعداد المعلّمَين حسين زعرور ومحمد عبدالله</footer>
 </div>
 '''
     src = os.path.join(HERE, "book.src.html")

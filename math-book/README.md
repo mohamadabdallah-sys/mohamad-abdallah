@@ -1,5 +1,7 @@
 # رياضيات التكميلية المهنية — Arabic math book
 
+By teachers **Houssein Zaaror** (حسين زعرور) and **Mohamad Abdallah** (محمد عبدالله).
+
 An Arabic math book built from the official exam questions of 2015, 2016 and 2017 (التكميلية المهنية, first session).
 It uses English digits and `x`, `y` throughout.
 
