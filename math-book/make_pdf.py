@@ -71,7 +71,7 @@ def section_color(keys_by_page, n_pages):
 def decorate(pdf_in, first_number, found, out, cover=None, toc_titles=None):
     body = pymupdf.open(pdf_in)
     colors = section_color(found, len(body))
-    logo = P("assets", "mabarrat-logo.jpg")
+    logo = P("assets", "book-logo.png")
     for i, page in enumerate(body):
         frame(page, first_number + i, colors[i], logo)
     doc = pymupdf.open()

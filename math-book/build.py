@@ -91,8 +91,8 @@ def ps_logo():
 
 
 def logo():
-    data = open(os.path.join(HERE, "assets", "mabarrat-logo.jpg"), "rb").read()
-    return "data:image/jpeg;base64," + base64.b64encode(data).decode()
+    data = open(os.path.join(HERE, "assets", "book-logo.svg"), "rb").read()
+    return "data:image/svg+xml;base64," + base64.b64encode(data).decode()
 
 
 # ---------- sections ----------------------------------------------------
@@ -104,8 +104,7 @@ def cover():
     return f'''
 <section class="sheet cover" id="top">
   <div class="cover-top">
-    <img class="cover-logo" src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447">
-    <p class="cover-org">جمعيّة المبرّات الخيريّة</p>
+    <img class="cover-logo" src="{logo()}" alt="شعار الكتاب: قبّعة طاهٍ عليها رمز الجذر" width="200" height="200">
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
   </div>
   <svg class="cover-wave" viewBox="0 0 800 70" preserveAspectRatio="none" aria-hidden="true">
