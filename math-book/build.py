@@ -1,11 +1,24 @@
 # -*- coding: utf-8 -*-
 """Build the Arabic math book: verify answers -> HTML with TeX -> render.js (KaTeX + fonts inline)."""
-import base64, os, re, subprocess, sys, urllib.request
+import base64, json, os, re, subprocess, sys, urllib.request
 from content import LESSONS, EXAMS
 import verify
 from illustrations import FIGS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+PAGES_FILE = os.path.join(HERE, "pages.json")
+PAGES = json.load(open(PAGES_FILE)) if os.path.exists(PAGES_FILE) else {}
+PARTS = ["الشرح", "أمثلة محلولة", "تطبيقات من المطبخ والمطعم", "تمارين", "بناء المهارات: خطوات حلّ المسألة",
+         "صح أم خطأ؟", "تقييم إضافي", "التعلّم الاجتماعي العاطفي", "سؤال بحث", "نموذج امتحان الدرس مع الحلّ"]
+
+
+def mk(key):
+    """Invisible print marker; make_pdf.py finds it in the PDF to learn the section's page."""
+    return f'<em class="pgmark">@@{key}@@</em>'
+
+
+def pg(key):
+    return str(PAGES.get(key, "—"))
 
 INSTR = {
     "expand": "وسّع واختزل كل عبارة:",
@@ -118,17 +131,38 @@ def howto():
   <div class="front-grid">
     <div>
       <p class="credit">إعداد المعلّمَين: <b>حسين زعرور</b> و<b>محمد عبدالله</b></p>
-      <h2 class="h-sec">المحتويات</h2>
-      <ol class="toc">{toc}</ol>
+      <h2 class="h-sec">{mk("howto")}كيف تستعمل هذا الكتاب؟</h2>
+      <div class="how">{cards}</div>
     </div>
     <div>
-      <h2 class="h-sec">كيف تستعمل هذا الكتاب؟</h2>
-      <div class="how">{cards}</div>
       <h3 class="h-sub">مستويات التمارين</h3>
       <ul class="levels">{rows}</ul>
       <p class="note-small">كل الأعداد مكتوبة بالأرقام الإنكليزيّة (0 1 2 3 …) والمتغيّرات بالرمزين \\(x\\) و\\(y\\) كما في النسخة الإنكليزيّة/الفرنسيّة من الامتحان.</p>
     </div>
   </div>
+</section>'''
+
+
+def index_page():
+    blocks = []
+    for L in LESSONS:
+        rows = "".join(f'<li><a href="#{L["id"]}"><span>{i + 1}. {p}</span><i></i><b>{pg(L["id"] + "-" + str(i + 1))}</b></a></li>'
+                       for i, p in enumerate(PARTS))
+        blocks.append(f'''<div class="ix-block c-{L["color"]}">
+  <a class="ix-h" href="#{L["id"]}"><span class="toc-n">{L["num"]}</span><span class="ix-t">الدرس {L["num"]}: {L["title"]}</span><i></i><b>{pg(L["id"])}</b></a>
+  <ol>{rows}</ol></div>''')
+    ex = "".join(f'<li><a href="#{X["id"]}"><span>{X["title"]}</span><i></i><b>{pg(X["id"])}</b></a></li>' for X in EXAMS)
+    blocks.append(f'''<div class="ix-block c-ink">
+  <a class="ix-h" href="#exams"><span class="toc-n">7</span><span class="ix-t">الامتحانات الرسميّة ونماذج التدريب</span><i></i><b>{pg("exams")}</b></a>
+  <ol>{ex}</ol>
+  <a class="ix-h ix-h2" href="#summary"><span class="toc-n">8</span><span class="ix-t">بطاقة المراجعة السريعة</span><i></i><b>{pg("summary")}</b></a>
+</div>''')
+    return f'''
+<section class="sheet index" id="index">
+  <p class="eyebrow">{mk("index")}Contents</p>
+  <h2 class="h-big">الفهرس</h2>
+  <p class="ix-front"><a href="#top"><span>كيف تستعمل هذا الكتاب؟</span><i></i><b>{pg("howto")}</b></a></p>
+  <div class="ix-grid">{"".join(blocks)}</div>
 </section>'''
 
 
@@ -281,6 +315,13 @@ def self_rows(L):
 
 
 def lesson(L):
+    html = _lesson(L)
+    html = html.replace('<p class="eyebrow">الدرس', f'<p class="eyebrow">{mk(L["id"])}الدرس', 1)
+    return re.sub(r'<h3 class="h-part( quiz-part)?"><span>(\d+)</span>',
+                  lambda m_: f'<h3 class="h-part{m_.group(1) or ""}">{mk(L["id"] + "-" + m_.group(2))}<span>{m_.group(2)}</span>', html)
+
+
+def _lesson(L):
     goals = "".join(f"<li>{g}</li>" for g in L["goals"])
     words = "".join(f'<tr><td>{a}</td><td dir="ltr">{e}</td><td dir="ltr">{f}</td></tr>' for a, e, f in L["exam_words"])
     exs = "".join(example_card(i + 1, e) for i, e in enumerate(L["examples"]))
@@ -346,7 +387,7 @@ def lesson(L):
 
 def exams():
     out = ['''<section class="sheet exams-intro" id="exams">
-  <p class="eyebrow">الفصل الأخير</p>
+  <p class="eyebrow">''' + mk("exams") + '''الفصل الأخير</p>
   <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
   <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ستّة نماذج جديدة على النمط نفسه تمامًا:
   أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
@@ -371,7 +412,7 @@ def exams():
         out.append(f'''
 <section class="sheet exam {"official" if X["official"] else "mock"}" id="{X["id"]}">
   <header class="exam-h">
-    <div><span class="badge">{badge}</span><h2>{X["title"]}</h2><p>{X["sub"]}</p></div>
+    <div>{mk(X["id"])}<span class="badge">{badge}</span><h2>{X["title"]}</h2><p>{X["sub"]}</p></div>
     <dl><div><dt>المدّة</dt><dd>ساعة ونصف</dd></div><div><dt>التوزيع</dt><dd>5 علامات / سؤال</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
   </header>
   <ol class="eqs">{"".join(qs)}</ol>
@@ -386,7 +427,7 @@ def summary():
         blocks.append(f'<div class="sum c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ul>{r}</ul></div>')
     return f'''
 <section class="sheet summary" id="summary">
-  <p class="eyebrow">قبل الامتحان</p>
+  <p class="eyebrow">{mk("summary")}قبل الامتحان</p>
   <h2 class="h-big">بطاقة المراجعة السريعة</h2>
   <div class="sum-grid">{"".join(blocks)}</div>
 </section>'''
@@ -449,7 +490,7 @@ def main():
         print("answers failed verification:", bad); sys.exit(1)
     print(f"verified {n} answers")
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    book = cover() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary()
+    book = cover() + index_page() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary()
     page(css, "رياضيات التكميلية المهنية", book, "index.html")
     page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
 

@@ -24,6 +24,6 @@ The book ends with:
 npm install          # KaTeX
 pip install sympy
 python3 build.py     # verifies every answer with sympy, then writes index.html
-node pdf.js          # writes the PDF (Playwright / Chromium)
+python3 make_pdf.py  # builds both PDFs: cover + framed, page-numbered pages, filled-in index, bookmarks
 ```
 The content lives in `content.py`. `verify.py` checks every exercise and exam answer. The build stops if any answer is wrong.
