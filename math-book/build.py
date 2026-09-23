@@ -7,9 +7,9 @@ import verify
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 INSTR = {
-    "expand": "انشر واختزل كل عبارة:",
+    "expand": "وسّع واختزل كل عبارة:",
     "factor": "حلّل كل عبارة إلى عوامل:",
-    "poly": "لكل كثيرة حدود: أ) انشر واختزل P(x)، ب) حلّل P(x).",
+    "poly": "لكل كثيرة حدود: أ) وسّع واختزل P(x)، ب) حلّل P(x).",
     "roots": "بسّط كل عبارة:",
     "rational": "أنطِق المقام ثم بسّط:",
     "systems": "حلّ الأنظمة والمسائل التالية:",
@@ -61,11 +61,14 @@ def cover():
     return f'''
 <section class="sheet cover" id="top">
   <div class="cover-glyphs" aria-hidden="true">{g}</div>
-  <div class="cover-logo"><img src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447"></div>
+  <div class="cover-top">
+    <div class="cover-logo"><img src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447"></div>
+    <p class="cover-org">جمعيّة المبرّات الخيريّة</p>
+  </div>
   <div class="cover-in">
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
-    <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، وتمارين متدرّجة من السهل إلى الصعب — وفق أسئلة الامتحانات الرسميّة <b>2015 · 2016 · 2017</b>.</p>
+    <p class="cover-sub">شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
     <ol class="cover-chips">{chips}</ol>
     <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
@@ -81,6 +84,7 @@ def howto():
              ("check", "أمثلة محلولة", "حلول خطوة بخطوة — كثير منها من الامتحانات الرسميّة نفسها."),
              ("hat", "تطبيقات", "مسائل من عالم المطبخ والمطعم والحلويات تُظهر فائدة الدرس."),
              ("pen", "تمارين متدرّجة", "من السهل إلى الصعب ثم «تحدٍّ ★»؛ الإجابات كلّها في آخر الكتاب."),
+             ("bulb", "بناء المهارات", "أربع خطوات لحلّ أيّ مسألة: أفهم، أخطّط، أنفّذ، أتحقّق."),
              ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
              ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
     cards = "".join(f'<div class="how-card"><span class="ico">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in parts)
@@ -156,6 +160,26 @@ def exercises(L):
     return "".join(out)
 
 
+STEPS = [("أفهم المسألة", "Understand"), ("أخطّط للحلّ", "Plan"), ("أنفّذ", "Solve"), ("أتحقّق", "Check")]
+PROMPTS = ["ما المعطى؟ ما المطلوب؟", "ما القاعدة أو المعادلة التي سأستعملها؟", "أكتب الحلّ خطوة بخطوة:", "هل الجواب منطقيّ؟ أعوّض وأتحقّق:"]
+
+
+def skills(L):
+    sk = L["skills"]
+    strip = "".join(f'<li><b>{i + 1}</b><span>{a}</span><small dir="ltr">{e}</small></li>' for i, (a, e) in enumerate(STEPS))
+    model = "".join(f'<li><span class="sk-k"><b>{i + 1}</b>{STEPS[i][0]}</span><p>{t}</p></li>'
+                    for i, t in enumerate(sk["model"]["steps"]))
+    prac = "".join(f'''<article class="sk-p"><header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
+      <ol class="sk-lines">{"".join(f'<li><span class="sk-k"><b>{j + 1}</b>{STEPS[j][0]}</span><em>{PROMPTS[j]}</em><i></i></li>' for j in range(4))}</ol>
+    </article>''' for i, ex in enumerate(sk["practice"]))
+    return f'''<div class="skills">
+  <ol class="sk-strip">{strip}</ol>
+  <article class="sk-model"><header><span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
+  <h4 class="sk-your">دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
+  {prac}
+</div>'''
+
+
 def tf_items(L):
     return "".join(f'''<li><span class="q-n">{i + 1}</span><p>{t["s"]}</p>
       <span class="tf-box"><i></i>صح</span><span class="tf-box"><i></i>خطأ</span></li>''' for i, t in enumerate(L["tf"]))
@@ -203,7 +227,10 @@ def lesson(L):
   <p class="instr">{INSTR[L["id"]]}</p>
   {exercises(L)}
 
-  <h3 class="h-part"><span>5</span>صح أم خطأ؟</h3>
+  <h3 class="h-part"><span>5</span>بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
+  {skills(L)}
+
+  <h3 class="h-part"><span>6</span>صح أم خطأ؟</h3>
   <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة. (الأجوبة في آخر الكتاب)</p>
   <ol class="tf">{tf_items(L)}</ol>
 
@@ -221,7 +248,7 @@ def exams():
   حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
   <ul class="exam-tips">
     <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>النظام:</b> دائمًا تقريبًا السؤال الأوّل. تحقّق من الحلّ في المعادلتين.</p></li>
-    <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>P(x):</b> بعد النشر والتحليل احسب P(0) بالشكلين — يجب أن يتساويا.</p></li>
+    <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>P(x):</b> بعد التوسيع والتحليل احسب P(0) بالشكلين — يجب أن يتساويا.</p></li>
     <li><span class="ico">''' + ICON["bulb"] + '''</span><p><b>إنطاق المقام:</b> السؤال الأخير عادةً؛ المرافق هو المفتاح في الجزء ب.</p></li>
   </ul>
 </section>''']
@@ -232,7 +259,7 @@ def exams():
                 its = f'<div class="eq-one">{dm(items[0][0])}</div>'
             else:
                 its = '<ol class="eq-items">' + "".join(
-                    f'<li><span>{AR_LETTERS[i]})</span>{dm(t) if not t.startswith(chr(92) + "text") else "<em>" + ("انشر واختزل P(x)" if i == 0 else "حلّل P(x)") + "</em>"}</li>'
+                    f'<li><span>{AR_LETTERS[i]})</span>{dm(t) if not t.startswith(chr(92) + "text") else "<em>" + ("وسّع واختزل P(x)" if i == 0 else "حلّل P(x)") + "</em>"}</li>'
                     for i, (t, _, _) in enumerate(items)) + "</ol>"
             qs.append(f'''<li class="eq"><div class="eq-h"><span class="eq-r">{ROMAN[qi]}</span><b>{ar}</b><small dir="ltr">{en}</small><span class="pts">5 pts</span></div>{its}</li>''')
         badge = "رسمي" if X["official"] else "تدريب"
@@ -270,9 +297,11 @@ def answers():
                 k += 1
                 hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
                 items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
+        sk = "".join(f'<li><span class="a-n">{i + 1}</span><div>{ex["a"]}</div></li>' for i, ex in enumerate(L["skills"]["practice"]))
         tf = "".join(f'''<li><span class="a-n">{i + 1}</span><div><b class="{"ok" if t["truth"] else "no"}">{"صح" if t["truth"] else "خطأ"}</b>{(" — " + t["fix"]) if t["fix"] else ""}</div></li>'''
                      for i, t in enumerate(L["tf"]))
         out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol>'
+                   f'<p class="ans-sub">بناء المهارات</p><ol>{sk}</ol>'
                    f'<p class="ans-sub">صح أم خطأ؟</p><ol>{tf}</ol></div>')
     for X in EXAMS:
         items = []
@@ -316,7 +345,7 @@ def main():
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
     body = cover() + howto() + "".join(lesson(L) for L in LESSONS) + exams() + summary() + answers()
     html = f'''<title>رياضيات التكميلية المهنية</title>
-<meta name="description" content="كتاب رياضيات بالعربيّة: شرح، أمثلة، تطبيقات وتمارين متدرّجة وفق الامتحانات الرسميّة 2015–2017">
+<meta name="description" content="كتاب رياضيات بالعربيّة: شرح، أمثلة، تطبيقات، بناء المهارات وتمارين متدرّجة">
 <style>
 {font_css()}
 /*KATEX_CSS*/

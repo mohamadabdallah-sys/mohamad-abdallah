@@ -10,7 +10,7 @@ It uses English digits and `x`, `y` throughout.
 
 ## Contents
 Six lessons. Each lesson has an explanation, rule cards, common mistakes, worked examples, kitchen and restaurant
-applications, exercises at four levels (easy, medium, hard, challenge ★), a "True or False?" set on common
+applications, exercises at four levels (easy, medium, hard, challenge ★), a "Skills Builder" (problem-solving steps: understand, plan, solve, check), a "True or False?" set on common
 mistakes and a "Rate yourself" checklist. The cover carries the Al-Mabarrat Association logo (`assets/mabarrat-logo.jpg`).
 The book ends with:
 - the 3 official exams

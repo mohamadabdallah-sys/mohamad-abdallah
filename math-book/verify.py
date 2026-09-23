@@ -39,6 +39,16 @@ def run():
                     n += 1
                     if not check(c):
                         bad.append((L["id"], lvl, i + 1, c))
+        sk = L.get("skills")
+        if sk:
+            n += 1
+            if not check(sk["model"]["chk"]):
+                bad.append((L["id"], "skills-model", sk["model"]["chk"]))
+            for i, ex in enumerate(sk["practice"]):
+                for c in (ex["chk"] if isinstance(ex["chk"], list) else [ex["chk"]]):
+                    n += 1
+                    if not check(c):
+                        bad.append((L["id"], "skills", i + 1, c))
         for i, t in enumerate(L.get("tf", [])):
             n += 1
             if check(t["chk"]) != t["truth"]:
