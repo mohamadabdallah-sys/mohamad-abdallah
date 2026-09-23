@@ -3,6 +3,7 @@
 import base64, os, re, subprocess, sys, urllib.request
 from content import LESSONS, EXAMS
 import verify
+from illustrations import FIGS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,6 +15,7 @@ INSTR = {
     "rational": "أنطِق المقام ثم بسّط:",
     "systems": "حلّ الأنظمة والمسائل التالية:",
 }
+KIND = {"expand": "وسّع", "factor": "حلّل", "poly": "وسّع وحلّل", "roots": "بسّط", "rational": "أنطِق", "systems": "حلّ"}
 LEVELS = [("easy", 1, "سهل", "تمارين مباشرة على القاعدة"),
           ("medium", 2, "متوسّط", "قاعدتان أو أكثر في التمرين"),
           ("hard", 3, "صعب", "مستوى الامتحان الرسمي وما فوق"),
@@ -168,7 +170,9 @@ def exercises(L):
             k += 1
             wide = ex["text"] or L["id"] == "poly"
             body = f'<p>{ex["q"]}</p>' if ex["text"] else dm(ex["q"])
-            items.append(f'<li class="{"wide" if wide else ""}"><span class="q-n">{k}</span><div class="q-b">{body}</div></li>')
+            kind = ex.get("kind") or ("مسألة" if ex["text"] else KIND[L["id"]])
+            vary = " vary" if ex.get("kind") else ""
+            items.append(f'<li class="{"wide" if wide else ""}{vary}"><span class="q-n">{k}</span><div class="q-b"><span class="q-kind">{kind}</span>{body}</div></li>')
         if not L.get(key):
             continue
         out.append(f'''<div class="lvl lvl-{n}">
@@ -297,6 +301,8 @@ def lesson(L):
     <div class="words"><h3><span class="ico">{ICON["book"]}</span>كيف يأتي السؤال في الامتحان؟</h3>
       <div class="tbl"><table><thead><tr><th>عربي</th><th>English</th><th>Français</th></tr></thead><tbody>{words}</tbody></table></div></div>
   </div>
+
+  <figure class="lesson-fig">{FIGS[L["id"]][0]()}<figcaption>{FIGS[L["id"]][1]}</figcaption></figure>
 
   <h3 class="h-part"><span>1</span>الشرح</h3>
   <div class="prose">{L["explain"]}</div>

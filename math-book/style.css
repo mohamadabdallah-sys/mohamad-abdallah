@@ -101,11 +101,11 @@ ol, ul { margin: 0; padding: 0; list-style: none; }
   font-family: var(--f-display); font-size: .88rem; color: #CFE2D6; }
 .cover-foot span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); margin-inline-end: 8px; vertical-align: middle; }
 
-.authors { display: grid; gap: 2px; padding: 14px 16px; border-radius: 6px; border: 1px solid rgba(233,180,76,.45); background: rgba(233,180,76,.08); justify-self: start; }
-.authors span { font-family: var(--f-display); font-size: .78rem; letter-spacing: .04em; color: var(--gold); }
-.authors p { font-family: var(--f-display); font-size: 1.3rem; font-weight: 700; color: #fff; }
+.authors { display: grid; gap: 0; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(233,180,76,.45); background: rgba(233,180,76,.08); justify-self: start; }
+.authors span { font-family: var(--f-display); font-size: .7rem; letter-spacing: .04em; color: var(--gold); }
+.authors p { font-family: var(--f-display); font-size: .98rem; font-weight: 700; color: #fff; }
 .authors i { font-style: normal; color: var(--gold); margin-inline: 6px; }
-.authors small { font-size: .78rem; color: #CFE2D6; text-align: right; }
+.authors small { font-size: .68rem; color: #CFE2D6; text-align: right; }
 .credit { font-size: .9rem; color: var(--ink-2); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
 /* ===== Front matter ====================================================== */
 .front-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
@@ -278,6 +278,32 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 .qsol-part .steps { padding: 0 0 4px; }
 .qs-lab { font-family: var(--f-display); font-weight: 600; color: var(--c); padding-top: 10px; }
 
+/* Lesson illustration */
+.lesson-fig { margin: 20px auto 4px; max-width: 520px; padding: 14px 16px 10px; border-radius: 14px; background: var(--soft); display: grid; gap: 6px; }
+.lesson-fig figcaption { text-align: center; font-size: .85rem; color: var(--ink-2); font-family: var(--f-display); }
+.il { display: block; width: 100%; height: auto; }
+.il .st { stroke: var(--paper); stroke-width: 3; }
+.il .f1 { fill: color-mix(in srgb, var(--c) 32%, var(--paper)); }
+.il .f2 { fill: color-mix(in srgb, var(--gold) 55%, var(--paper)); }
+.il .f3 { fill: color-mix(in srgb, var(--coral) 40%, var(--paper)); }
+.il .lt { fill: var(--ink); font-family: var(--f-display); font-size: 15px; font-weight: 600; }
+.il .lt .big { font-size: 20px; } .il .sm { font-size: 13px; font-weight: 500; }
+.il .acc { fill: var(--c); font-weight: 700; }
+.il .ln, .il .ax, .il .arrow { fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.il .grid { stroke: color-mix(in srgb, var(--ink-3) 30%, var(--paper)); stroke-width: 1; }
+.il .curve { fill: none; stroke: var(--c); stroke-width: 3.5; stroke-linecap: round; }
+.il .dot { fill: var(--c); stroke: var(--paper); stroke-width: 2; }
+.il .tray { fill: color-mix(in srgb, var(--ink-3) 35%, var(--paper)); }
+.il .bread { fill: #D9A25B; stroke: #B07A38; stroke-width: 2; }
+.il .score { fill: none; stroke: #9C6A2E; stroke-width: 2.2; stroke-linecap: round; }
+.il .card { fill: var(--paper); stroke: var(--line); stroke-width: 2; } .il .acc-card { stroke: var(--c); }
+.il .line1 { stroke: var(--blue); stroke-width: 3; } .il .line2 { stroke: var(--coral); stroke-width: 3; }
+.il .l1 { fill: var(--blue); } .il .l2 { fill: var(--coral); }
+/* exercise type chip */
+.q-kind { display: inline-block; font-family: var(--f-display); font-size: .66rem; font-weight: 600; color: var(--ink-3); letter-spacing: .02em;
+  padding: 0 8px; border-radius: 99px; border: 1px solid var(--line); line-height: 1.6; margin-top: 4px; }
+.qs li.vary .q-kind { color: var(--paper); background: var(--c); border-color: var(--c); }
+
 /* Extra assessment */
 .assess { display: grid; gap: 12px; }
 .mcq { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
@@ -408,6 +434,7 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
   .cover-in { padding: 8mm 18mm 16mm; }
   .sel-card { break-inside: avoid; }
   .quiz-part { break-before: page; }
+  .lesson-fig { break-inside: avoid; }
   .mcq-q, .open-q, .research { break-inside: avoid; }
   .lquiz-sol { break-before: page; }
   .qsol { break-inside: avoid; }
