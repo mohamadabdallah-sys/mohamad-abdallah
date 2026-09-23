@@ -97,6 +97,7 @@ def main():
             break
         json.dump(pages, open(P("pages.json"), "w"), ensure_ascii=False, indent=1, sort_keys=True)
         prev = pages
+    run("node", "logo.js")
     run("node", "pdf.js", "index.html", "_cover.pdf", "cover")
     titles = [(1, "الفهرس", "index")]
     for L in content.LESSONS:

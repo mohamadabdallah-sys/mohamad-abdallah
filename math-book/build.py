@@ -104,7 +104,7 @@ def cover():
     return f'''
 <section class="sheet cover" id="top">
   <div class="cover-top">
-    <img class="cover-logo" src="{logo()}" alt="شعار الكتاب: قبّعة طاهٍ عليها رمز الجذر" width="200" height="200">
+    <div class="cover-logo">{open(os.path.join(HERE, "assets", "book-logo.svg"), encoding="utf-8").read()}</div>
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
   </div>
   <svg class="cover-wave" viewBox="0 0 800 70" preserveAspectRatio="none" aria-hidden="true">

@@ -665,6 +665,9 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 @media (max-width: 720px) { .index .ix-grid { grid-template-columns: 1fr; } }
 @media print { .ix-block li a { font-size: .68rem; line-height: 1.28; } .ix-h { font-size: .84rem; } .ix-h .ix-t { line-height: 1.25; } }
 @media print { .keep { break-inside: avoid; } }
+.cover-logo svg { display: block; width: 100%; height: auto; }
+div.cover-logo { width: clamp(160px, 38vw, 230px); }
+@media print { div.cover-logo { width: 66mm; } }
 
 </style>
 <div class="book" dir="rtl" lang="ar">

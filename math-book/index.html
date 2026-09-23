@@ -665,13 +665,40 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 @media (max-width: 720px) { .index .ix-grid { grid-template-columns: 1fr; } }
 @media print { .ix-block li a { font-size: .68rem; line-height: 1.28; } .ix-h { font-size: .84rem; } .ix-h .ix-t { line-height: 1.25; } }
 @media print { .keep { break-inside: avoid; } }
+.cover-logo svg { display: block; width: 100%; height: auto; }
+div.cover-logo { width: clamp(160px, 38vw, 230px); }
+@media print { div.cover-logo { width: 66mm; } }
 
 </style>
 <div class="book" dir="rtl" lang="ar">
 
 <section class="sheet cover" id="top">
   <div class="cover-top">
-    <img class="cover-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9Ijk3IiBmaWxsPSIjMEU1QTM0Ii8+CiAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI4NiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRTlCNDRDIiBzdHJva2Utd2lkdGg9IjQiLz4KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9Ijc5IiBmaWxsPSIjMTM2ODNEIi8+CiAgPGcgZmlsbD0iI0U5QjQ0QyI+CiAgICA8cGF0aCBkPSJNMTAwIDcgbDUgNSAtNSA1IC01IC01eiIvPjxwYXRoIGQ9Ik0xMDAgMTgzIGw1IDUgLTUgNSAtNSAtNXoiLz4KICAgIDxwYXRoIGQ9Ik03IDEwMCBsNSAtNSA1IDUgLTUgNXoiLz48cGF0aCBkPSJNMTgzIDEwMCBsNSAtNSA1IDUgLTUgNXoiLz4KICA8L2c+CiAgPGcgZmlsbD0iI0ZGRkZGRiI+CiAgICA8Y2lyY2xlIGN4PSI3MCIgY3k9IjgwIiByPSIyMiIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjY4IiByPSIyNyIvPjxjaXJjbGUgY3g9IjEzMCIgY3k9IjgwIiByPSIyMiIvPgogICAgPHJlY3QgeD0iNjYiIHk9Ijc4IiB3aWR0aD0iNjgiIGhlaWdodD0iNTQiIHJ4PSI2Ii8+CiAgPC9nPgogIDxyZWN0IHg9IjYyIiB5PSIxMjgiIHdpZHRoPSI3NiIgaGVpZ2h0PSIyMCIgcng9IjUiIGZpbGw9IiNFOUI0NEMiLz4KICA8Y2lyY2xlIGN4PSI4MiIgY3k9IjEzOCIgcj0iMyIgZmlsbD0iIzBFNUEzNCIvPjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEzOCIgcj0iMyIgZmlsbD0iIzBFNUEzNCIvPjxjaXJjbGUgY3g9IjExOCIgY3k9IjEzOCIgcj0iMyIgZmlsbD0iIzBFNUEzNCIvPgogIDxwYXRoIGQ9Ik03NCAxMDQgbDggLTQgOSAyMCAxMyAtMzQgaDI4IiBmaWxsPSJub25lIiBzdHJva2U9IiMwRTVBMzQiIHN0cm9rZS13aWR0aD0iNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPHBhdGggZD0iTTEwOSA5NyBsMTQgMTcgTTEyMyA5NyBsLTE0IDE3IiBmaWxsPSJub25lIiBzdHJva2U9IiMwRTVBMzQiIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHBhdGggZD0iTTYwIDE2NCBxNDAgMTYgODAgMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRTlCNDRDIiBzdHJva2Utd2lkdGg9IjMuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=" alt="شعار الكتاب: قبّعة طاهٍ عليها رمز الجذر" width="200" height="200">
+    <div class="cover-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" class="math-logo" role="img" aria-label="Mathematics · رياضيات">
+  <defs>
+    <path id="ml-top" d="M 34 120 A 86 86 0 0 1 206 120"/>
+    <path id="ml-bot" d="M 28 126 A 92 92 0 0 0 212 126"/>
+  </defs>
+  <circle cx="120" cy="120" r="117" fill="#0E5A34"/>
+  <circle cx="120" cy="120" r="108" fill="none" stroke="#E9B44C" stroke-width="3"/>
+  <circle cx="120" cy="120" r="66" fill="#FFFFFF"/>
+  <circle cx="120" cy="120" r="66" fill="none" stroke="#E9B44C" stroke-width="4"/>
+  <path d="M120 60 V180 M60 120 H180" stroke="#DCE6DF" stroke-width="2"/>
+  <!-- + (top right) -->
+  <rect x="138" y="88" width="30" height="8" rx="3" fill="#0E5A34"/><rect x="149" y="77" width="8" height="30" rx="3" fill="#0E5A34"/>
+  <!-- − (top left) -->
+  <rect x="72" y="88" width="30" height="8" rx="3" fill="#C98E1E"/>
+  <!-- × (bottom left) -->
+  <g transform="rotate(45 87 147)"><rect x="72" y="143" width="30" height="8" rx="3" fill="#0E5A34"/><rect x="83" y="132" width="8" height="30" rx="3" fill="#0E5A34"/></g>
+  <!-- ÷ (bottom right) -->
+  <rect x="138" y="143" width="30" height="8" rx="3" fill="#C98E1E"/><circle cx="153" cy="133" r="4.5" fill="#C98E1E"/><circle cx="153" cy="161" r="4.5" fill="#C98E1E"/>
+  <text font-family="Readex Pro, Arial, sans-serif" font-weight="700" font-size="21" letter-spacing="4.5" fill="#FFFFFF" text-anchor="middle">
+    <textPath href="#ml-top" startOffset="50%">MATHEMATICS</textPath></text>
+  <text font-family="Readex Pro, Arial, sans-serif" font-weight="700" font-size="22" fill="#E9B44C" text-anchor="middle" direction="rtl">
+    <textPath href="#ml-bot" startOffset="50%" dy="0">رياضيات</textPath></text>
+  <g fill="#E9B44C"><path d="M22 120 l5 -5 5 5 -5 5z"/><path d="M208 120 l5 -5 5 5 -5 5z"/></g>
+</svg>
+</div>
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
   </div>
   <svg class="cover-wave" viewBox="0 0 800 70" preserveAspectRatio="none" aria-hidden="true">
