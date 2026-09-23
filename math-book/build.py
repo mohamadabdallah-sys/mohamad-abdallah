@@ -16,7 +16,8 @@ INSTR = {
 }
 LEVELS = [("easy", 1, "سهل", "تمارين مباشرة على القاعدة"),
           ("medium", 2, "متوسّط", "قاعدتان أو أكثر في التمرين"),
-          ("hard", 3, "صعب", "مستوى الامتحان الرسمي وما فوق")]
+          ("hard", 3, "صعب", "مستوى الامتحان الرسمي وما فوق"),
+          ("challenge", 4, "تحدٍّ", "للمتفوّقين — فكّر خارج الصندوق")]
 AR_LETTERS = ["أ", "ب", "ج", "د"]
 ROMAN = ["I", "II", "III", "IV", "V"]
 
@@ -40,8 +41,15 @@ ICON = {
 
 
 def meter(n):
+    if n == 4:
+        return '<span class="meter star" aria-label="تحدٍّ">★</span>'
     return '<span class="meter" aria-label="المستوى %d من 3">%s</span>' % (
         n, "".join('<i class="%s"></i>' % ("on" if k < n else "") for k in range(3)))
+
+
+def logo():
+    data = open(os.path.join(HERE, "assets", "mabarrat-logo.jpg"), "rb").read()
+    return "data:image/jpeg;base64," + base64.b64encode(data).decode()
 
 
 # ---------- sections ----------------------------------------------------
@@ -53,6 +61,7 @@ def cover():
     return f'''
 <section class="sheet cover" id="top">
   <div class="cover-glyphs" aria-hidden="true">{g}</div>
+  <div class="cover-logo"><img src="{logo()}" alt="شعار جمعيّة المبرّات الخيريّة" width="447" height="447"></div>
   <div class="cover-in">
     <p class="cover-eyebrow">الشهادة التكميليّة المهنيّة · الرياضيّات</p>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
@@ -71,7 +80,9 @@ def howto():
     parts = [("book", "الشرح والقواعد", "فكرة الدرس بكلمات بسيطة، ثم بطاقات القواعد التي يجب حفظها."),
              ("check", "أمثلة محلولة", "حلول خطوة بخطوة — كثير منها من الامتحانات الرسميّة نفسها."),
              ("hat", "تطبيقات", "مسائل من عالم المطبخ والمطعم والحلويات تُظهر فائدة الدرس."),
-             ("pen", "تمارين متدرّجة", "ثلاثة مستويات؛ الإجابات كلّها في آخر الكتاب.")]
+             ("pen", "تمارين متدرّجة", "من السهل إلى الصعب ثم «تحدٍّ ★»؛ الإجابات كلّها في آخر الكتاب."),
+             ("warn", "صح أم خطأ؟", "اصطد الأخطاء الشائعة قبل أن تقع فيها في الامتحان."),
+             ("target", "قيّم نفسك", "جدول صغير في آخر كل درس لتعرف ما أتقنتَه وما تحتاج إلى تمرينه.")]
     cards = "".join(f'<div class="how-card"><span class="ico">{ICON[i]}</span><h3>{t}</h3><p>{d}</p></div>' for i, t, d in parts)
     toc = "".join(f'''<li class="c-{L["color"]}"><a href="#{L["id"]}"><span class="toc-n">{L["num"]}</span>
       <span class="toc-t">{L["title"]}<small dir="ltr">{L["en"].split(" · ")[0]}</small></span></a></li>''' for L in LESSONS)
@@ -131,16 +142,27 @@ def exercises(L):
     out, k = [], 0
     for key, n, name, desc in LEVELS:
         items = []
-        for ex in L[key]:
+        for ex in L.get(key, []):
             k += 1
             wide = ex["text"] or L["id"] == "poly"
             body = f'<p>{ex["q"]}</p>' if ex["text"] else dm(ex["q"])
             items.append(f'<li class="{"wide" if wide else ""}"><span class="q-n">{k}</span><div class="q-b">{body}</div></li>')
+        if not L.get(key):
+            continue
         out.append(f'''<div class="lvl lvl-{n}">
   <div class="lvl-h">{meter(n)}<h4>المستوى {n} · {name}</h4><span>{desc}</span></div>
   <ol class="qs">{"".join(items)}</ol>
 </div>''')
     return "".join(out)
+
+
+def tf_items(L):
+    return "".join(f'''<li><span class="q-n">{i + 1}</span><p>{t["s"]}</p>
+      <span class="tf-box"><i></i>صح</span><span class="tf-box"><i></i>خطأ</span></li>''' for i, t in enumerate(L["tf"]))
+
+
+def self_rows(L):
+    return "".join(f'<tr><td>{s}</td><td><i class="box"></i></td><td><i class="box"></i></td></tr>' for s in L["self"])
 
 
 def lesson(L):
@@ -180,6 +202,13 @@ def lesson(L):
   <h3 class="h-part"><span>4</span>تمارين</h3>
   <p class="instr">{INSTR[L["id"]]}</p>
   {exercises(L)}
+
+  <h3 class="h-part"><span>5</span>صح أم خطأ؟</h3>
+  <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة. (الأجوبة في آخر الكتاب)</p>
+  <ol class="tf">{tf_items(L)}</ol>
+
+  <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
+    <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
 </section>'''
 
 
@@ -187,7 +216,7 @@ def exams():
     out = ['''<section class="sheet exams-intro" id="exams">
   <p class="eyebrow">الفصل الأخير</p>
   <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
-  <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم نموذجان جديدان على النمط نفسه تمامًا:
+  <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ثلاثة نماذج جديدة على النمط نفسه تمامًا:
   أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
   حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
   <ul class="exam-tips">
@@ -237,11 +266,14 @@ def answers():
     for L in LESSONS:
         k, items = 0, []
         for key, n, name, _ in LEVELS:
-            for ex in L[key]:
+            for ex in L.get(key, []):
                 k += 1
                 hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
                 items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
-        out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol></div>')
+        tf = "".join(f'''<li><span class="a-n">{i + 1}</span><div><b class="{"ok" if t["truth"] else "no"}">{"صح" if t["truth"] else "خطأ"}</b>{(" — " + t["fix"]) if t["fix"] else ""}</div></li>'''
+                     for i, t in enumerate(L["tf"]))
+        out.append(f'<div class="ans c-{L["color"]}"><h3><b>{L["num"]}</b>{L["title"]}</h3><ol>{"".join(items)}</ol>'
+                   f'<p class="ans-sub">صح أم خطأ؟</p><ol>{tf}</ol></div>')
     for X in EXAMS:
         items = []
         for qi, (_, _, its) in enumerate(X["qs"]):

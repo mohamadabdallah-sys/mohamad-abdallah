@@ -23,19 +23,26 @@ def check(chk):
         sol = sp.solve(exprs, [x, y], dict=True)
         return (len(sol) == 1 and abs(float(sol[0][x]) - xv) < 1e-9
                 and abs(float(sol[0][y]) - yv) < 1e-9)
+    if kind == "pt":
+        eqs, (xv, yv) = chk[1], chk[2]
+        return all(sp.simplify(sp.sympify(e, locals=NS).subs({x: xv, y: yv})) == 0 for e in eqs)
     raise ValueError(kind)
 
 
 def run():
     bad, n = [], 0
     for L in LESSONS:
-        for lvl in ("easy", "medium", "hard"):
-            for i, ex in enumerate(L[lvl]):
+        for lvl in ("easy", "medium", "hard", "challenge"):
+            for i, ex in enumerate(L.get(lvl, [])):
                 chks = ex["chk"] if isinstance(ex["chk"], list) else [ex["chk"]]
                 for c in chks:
                     n += 1
                     if not check(c):
                         bad.append((L["id"], lvl, i + 1, c))
+        for i, t in enumerate(L.get("tf", [])):
+            n += 1
+            if check(t["chk"]) != t["truth"]:
+                bad.append((L["id"], "tf", i + 1, t["chk"]))
     for X in EXAMS:
         for qi, q in enumerate(X["qs"]):
             for it in q[2]:

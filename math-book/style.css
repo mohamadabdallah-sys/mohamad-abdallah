@@ -81,7 +81,7 @@ ol, ul { margin: 0; padding: 0; list-style: none; }
 .cover-glyphs .g9 { top: 48%; left: 44%; font-size: 2rem; }
 .cover-glyphs .g10 { top: 15%; right: 30%; font-size: 1.9rem; }
 .cover-glyphs .g11 { top: 52%; left: 20%; font-size: 1.7rem; }
-.cover-in { position: relative; display: grid; gap: 18px; padding-top: 180px; }
+.cover-in { position: relative; display: grid; gap: 18px; padding-top: 220px; }
 .cover-eyebrow { font-family: var(--f-display); font-size: .9rem; letter-spacing: .05em; color: var(--gold); }
 .cover h1 { font-size: clamp(2.6rem, 9vw, 4.6rem); font-weight: 700; line-height: 1.12; }
 .cover h1 span { color: var(--gold); font-weight: 600; }
@@ -204,6 +204,26 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 .q-b p { font-size: .95rem; padding-block: 8px; }
 .lvl-3 .qs li { border-color: color-mix(in srgb, var(--c) 35%, var(--paper)); }
 
+.meter.star { font-size: 1.05rem; line-height: 1; color: var(--gold); text-shadow: 0 0 1px var(--saffron); }
+.lvl-4 { border-radius: 10px; padding: 4px 14px 14px; background: color-mix(in srgb, var(--gold) 12%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--paper)); }
+.lvl-4 .lvl-h { border-bottom-color: color-mix(in srgb, var(--gold) 55%, var(--paper)); }
+.lvl-4 .qs li { grid-column: 1 / -1; background: var(--paper); border-color: color-mix(in srgb, var(--gold) 60%, var(--paper)); }
+.lvl-4 .q-n { background: var(--gold); color: #3A2A05; }
+.tf { display: grid; gap: 8px; }
+.tf li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.tf li > p { flex: 1 1 220px; }
+.tf-box { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 600; color: var(--ink-2); }
+.tf-box i, .self i.box { display: inline-block; width: 18px; height: 18px; border: 1.5px solid var(--c); border-radius: 4px; }
+.self { margin-top: 26px; padding: 14px 18px; border-radius: 10px; border: 2px dashed color-mix(in srgb, var(--c) 45%, var(--paper)); }
+.self h4 { display: flex; align-items: center; gap: 8px; font-size: 1rem; color: var(--c); margin-bottom: 6px; }
+.self td:not(:first-child), .self th:not(:first-child) { text-align: center; width: 110px; }
+.ans-sub { font-family: var(--f-display); font-weight: 600; font-size: .8rem; color: var(--c); padding: 4px 14px 0; border-top: 1px solid var(--line); }
+.ans b.ok { color: var(--green); } .ans b.no { color: var(--coral); }
+.cover-logo { position: absolute; top: clamp(20px, 5vw, 44px); right: clamp(20px, 5vw, 44px); z-index: 1;
+  width: clamp(104px, 22vw, 150px); padding: 10px; background: #fff; border-radius: 18px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.cover-logo img { display: block; width: 100%; height: auto; }
+
 /* ===== Exams ============================================================= */
 .exams-intro { --c: var(--inkc); }
 .exam-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 20px; }
@@ -284,6 +304,8 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
   .sheet { box-shadow: none; border-radius: 0; padding: 13mm 12mm 14mm; break-before: page; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
   .cover { break-before: auto; height: 297mm; overflow: hidden; break-after: page; min-height: 0; padding: 22mm 18mm; border-radius: 0; }
   .cover-glyphs .g { font-size: 4rem; }
+  .cover-logo { top: 20mm; right: 18mm; width: 44mm; }
+  .tf li, .self { break-inside: avoid; }
   .cover-in { padding-top: 0; }
   .ex, .app, .rule, .lvl-h, .qs li, .eq, .sum, .ans li, .warn, .steps li, .exam-h { break-inside: avoid; }
   .h-part { break-after: avoid; margin-block: 22px 10px; }

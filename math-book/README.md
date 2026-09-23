@@ -10,9 +10,11 @@ It uses English digits and `x`, `y` throughout.
 
 ## Contents
 Six lessons. Each lesson has an explanation, rule cards, common mistakes, worked examples, kitchen and restaurant
-applications, and exercises at three levels (easy, medium, hard). The book ends with:
+applications, exercises at four levels (easy, medium, hard, challenge ★), a "True or False?" set on common
+mistakes and a "Rate yourself" checklist. The cover carries the Al-Mabarrat Association logo (`assets/mabarrat-logo.jpg`).
+The book ends with:
 - the 3 official exams
-- 2 mock exams in the same format
+- 3 mock exams in the same format
 - a formula sheet
 - a full answer key
 
