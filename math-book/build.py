@@ -19,7 +19,12 @@ SEL_EMO = {"coop": "🤝", "reflect": "🪞", "self": "🧭", "comm": "💬", "d
 
 
 def emo(e):
-    return f'<span class="emo" aria-hidden="true">{e}</span>'
+    return ""
+
+
+def stk(e, cls=""):
+    """A large decorative emoji 'sticker' placed beside a question or in empty space."""
+    return f'<span class="stk {cls}" aria-hidden="true">{e}</span>'
 
 
 def mk(key):
@@ -109,7 +114,6 @@ def cover():
   <div class="cover-in">
     <div class="cover-glyphs" aria-hidden="true">{g}</div>
     <h1>رياضيات<br><span>التكميليّة المهنيّة</span></h1>
-    <p class="cover-sub">✨ شرح مبسّط، أمثلة محلولة، تطبيقات من المطبخ والمطعم، بناء مهارات حلّ المسائل، وتمارين متدرّجة من السهل إلى التحدّي.</p>
     <div class="authors"><span>إعداد المعلّمَين</span><p>حسين زعرور <i>·</i> محمد عبدالله</p><small dir="ltr">Teachers: Houssein Zaaror &amp; Mohamad Abdallah</small></div>
     <div class="cover-foot">
       <span>أمين خدمة بالمطعم</span><span>طاهٍ</span><span>حلواني</span>
@@ -142,7 +146,7 @@ def howto():
   <div class="front-grid">
     <div>
       <p class="credit">إعداد المعلّمَين: <b>حسين زعرور</b> و<b>محمد عبدالله</b></p>
-      <h2 class="h-sec">{mk("howto")}كيف تستعمل هذا الكتاب؟ 🧭</h2>
+      <h2 class="h-sec">{mk("howto")}كيف تستعمل هذا الكتاب؟</h2>
       <div class="how">{cards}</div>
     </div>
     <div>
@@ -165,13 +169,13 @@ def cards():
   <header>{emo(LESSON_EMO[L["id"]])}<span>الدرس {L["num"]}</span><b>{k}</b></header>
   <p class="card-q">{q["q"]}</p>
   <ol class="card-o">{opts}</ol>
-  <footer><span class="flip">🙃 الجواب: {AR_LETTERS[q["ans"]]})</span></footer>
+  <footer><span class="flip">الجواب: {AR_LETTERS[q["ans"]]})</span></footer>
 </article>''')
     return f'''
 <section class="sheet cards" id="cards">
   <p class="eyebrow">{mk("cards")}MCQ Cards</p>
-  <h2 class="h-big">✂️ بطاقات المراجعة: اختيار من متعدّد</h2>
-  <p class="prose-p">قُصّ البطاقات على الخطّ المتقطّع ✂️، واختبر نفسك أو زميلك 🤝. الجواب مكتوب مقلوبًا في أسفل كل بطاقة: اقلب البطاقة بعد أن تختار 🙃.</p>
+  <h2 class="h-big">بطاقات المراجعة: اختيار من متعدّد</h2>
+  <p class="prose-p">قُصّ البطاقات على الخطّ المتقطّع، واختبر نفسك أو زميلك. الجواب مكتوب مقلوبًا في أسفل كل بطاقة: اقلب البطاقة بعد أن تختار .</p>
   <div class="card-grid">{"".join(out)}</div>
 </section>'''
 
@@ -186,7 +190,7 @@ def index_page():
   <ol>{rows}</ol></div>''')
     ex = "".join(f'<li><a href="#{X["id"]}"><span>{X["title"]}</span><i></i><b>{pg(X["id"])}</b></a></li>' for X in EXAMS)
     blocks.append(f'''<div class="ix-block c-ink">
-  <a class="ix-h" href="#cards"><span class="toc-n">7</span><span class="ix-t">بطاقات المراجعة MCQ ✂️</span><i></i><b>{pg("cards")}</b></a>
+  <a class="ix-h" href="#cards"><span class="toc-n">7</span><span class="ix-t">بطاقات المراجعة MCQ</span><i></i><b>{pg("cards")}</b></a>
   <a class="ix-h ix-h2" href="#exams"><span class="toc-n">8</span><span class="ix-t">الامتحانات الرسميّة ونماذج التدريب</span><i></i><b>{pg("exams")}</b></a>
   <ol>{ex}</ol>
   <a class="ix-h ix-h2" href="#summary"><span class="toc-n">9</span><span class="ix-t">بطاقة المراجعة السريعة</span><i></i><b>{pg("summary")}</b></a>
@@ -194,8 +198,7 @@ def index_page():
     return f'''
 <section class="sheet index" id="index">
   <p class="eyebrow">{mk("index")}Contents</p>
-  <h2 class="h-big">📚 الفهرس</h2>
-  <p class="ix-front"><a href="#top"><span>كيف تستعمل هذا الكتاب؟</span><i></i><b>{pg("howto")}</b></a></p>
+  <h2 class="h-big">الفهرس</h2>
   <div class="ix-grid">{"".join(blocks)}</div>
 </section>'''
 
@@ -216,7 +219,7 @@ def example_card(i, ex):
     steps = "".join(f'''<li><div class="st-m">{dm(t)}</div>{f'<p class="st-n">{n}</p>' if n else ""}</li>'''
                     for t, n in ex["steps"])
     return f'''<article class="ex">
-  <header><span class="ex-n">✏️ مثال {i}</span>{tag}</header>
+  <header><span class="ex-n">مثال {i}</span>{tag}</header>
   <div class="ex-q">{dm(ex["q"])}</div>
   <ol class="steps">{steps}</ol>
 </article>'''
@@ -240,11 +243,13 @@ def exercises(L):
             body = f'<p>{ex["q"]}</p>' if ex["text"] else dm(ex["q"])
             kind = ex.get("kind") or ("مسألة" if ex["text"] else KIND[L["id"]])
             vary = " vary" if ex.get("kind") else ""
-            items.append(f'<li class="{"wide" if wide else ""}{vary}"><span class="q-n">{k}</span><div class="q-b"><span class="q-kind">{kind}</span>{body}</div></li>')
+            face = {"اكتشف الخطأ": "🧐", "فسّر": "🤔", "أنشئ": "💡", "سؤال عكسيّ": "🤔"}.get(kind, "")
+            items.append(f'<li class="{"wide" if wide else ""}{vary}"><span class="q-n">{k}</span><div class="q-b"><span class="q-kind">{kind}</span>{body}</div>{stk(face, "mini") if face else ""}</li>')
         if not L.get(key):
             continue
-        out.append(f'''<div class="lvl lvl-{n}">
-  <div class="lvl-h">{meter(n)}<h4>{emo(LEVEL_EMO[n])} المستوى {n} · {name}</h4><span>{desc}</span></div>
+        sticker = stk("🤔") if n == 4 else ""
+        out.append(f'''<div class="lvl lvl-{n}">{sticker}
+  <div class="lvl-h">{meter(n)}<h4>المستوى {n} · {name}</h4><span>{desc}</span></div>
   <ol class="qs">{"".join(items)}</ol>
 </div>''')
     return "".join(out)
@@ -261,13 +266,13 @@ def skills(L):
     strip = "".join(f'<li><b>{i + 1}</b><span>{a}</span><small dir="ltr">{e}</small></li>' for i, (a, e) in enumerate(STEPS))
     model = "".join(f'<li><span class="sk-k"><b>{i + 1}</b>{STEPS[i][0]}</span><p>{t}</p></li>'
                     for i, t in enumerate(sk["model"]["steps"]))
-    prac = "".join(f'''<article class="sk-p">{SKB}<header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
+    prac = "".join(f'''<article class="sk-p">{stk("🤔", "bottom")}{SKB}<header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
       <ol class="sk-lines">{"".join(f'<li><span class="sk-k"><b>{j + 1}</b>{STEPS[j][0]}</span><em>{PROMPTS[j]}</em><i></i></li>' for j in range(4))}</ol>
     </article>''' for i, ex in enumerate(sk["practice"]))
     return f'''<div class="skills">
   <ol class="sk-strip">{strip}</ol>
-  <article class="sk-model"><header>{SKB}<span class="tag">✅ مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
-  <h4 class="sk-your">💪 دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
+  <article class="sk-model"><header>{SKB}<span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
+  <h4 class="sk-your">دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
   {prac}
 </div>'''
 
@@ -283,8 +288,9 @@ def sel(L):
         ic, name, en = SEL_KIND[a["kind"]]
         scale = ('<div class="sel-scale"><span>أقلّ ثقة</span>' + "".join(f"<i>{k}</i>" for k in range(1, 6)) + '<span>واثق جدًّا</span></div>') if a["scale"] else ""
         lines = '<div class="sel-lines">' + "<i></i>" * a["lines"] + "</div>" if a["lines"] else ""
-        cards.append(f'''<article class="sel-card sel-{a["kind"]}">
-  <header><span class="ico">{ICON[ic]}</span><div><span class="sel-k">{emo(SEL_EMO[a["kind"]])} {name}<small dir="ltr">{en}</small></span><h4>{a["title"]}</h4></div><span class="sel-fmt">{a["fmt"]}</span></header>
+        face = {"reflect": "🤔", "self": "😌", "coop": "😊"}.get(a["kind"], "")
+        cards.append(f'''<article class="sel-card sel-{a["kind"]}">{stk(face, "sm") if face else ""}
+  <header><span class="ico">{ICON[ic]}</span><div><span class="sel-k">{name}<small dir="ltr">{en}</small></span><h4>{a["title"]}</h4></div><span class="sel-fmt">{a["fmt"]}</span></header>
   <p>{a["body"]}</p>{scale}{lines}
 </article>''')
     return f'<div class="sel-grid">{"".join(cards)}</div>'
@@ -308,13 +314,13 @@ def quiz(L):
         sols.append(f'''<article class="qsol"><header><span class="eq-r">{ROMAN[qi]}</span><b>{prompt}</b></header>{"".join(parts)}</article>''')
     return f'''<div class="lquiz">
   <header class="exam-h">
-    <div><span class="badge">⏱️ نموذج امتحان</span><h2>امتحان الدرس {L["num"]}: {L["title"]}</h2><p>أجب عن الأسئلة التالية قبل أن تنظر إلى الحلّ.</p></div>
+    <div><span class="badge">نموذج امتحان</span><h2>امتحان الدرس {L["num"]}: {L["title"]}</h2><p>أجب عن الأسئلة التالية قبل أن تنظر إلى الحلّ.</p></div>
     <dl><div><dt>المدّة</dt><dd>30 دقيقة</dd></div><div><dt>العلامة</dt><dd>20</dd></div><div><dt>المستندات</dt><dd>لا شيء</dd></div></dl>
   </header>
   <ol class="eqs">{"".join(qs)}</ol>
 </div>
 <div class="lquiz-sol">
-  <h3 class="sol-h"><span class="ico">{ICON["check"]}</span>الحلّ المفصّل لنموذج الامتحان 💡</h3>
+  <h3 class="sol-h"><span class="ico">{ICON["check"]}</span>الحلّ المفصّل لنموذج الامتحان</h3>
   {"".join(sols)}
 </div>'''
 
@@ -327,13 +333,13 @@ def assess(L):
     return f'''<div class="assess">
   <p class="instr">اختر الإجابة الصحيحة وضع دائرة حول حرفها:</p>
   <ol class="mcq">{"".join(items)}</ol>
-  <div class="open-q"><span class="tag">💭 سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
+  <div class="open-q">{stk("🤔")}<span class="tag">سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
 </div>'''
 
 
 def research(L):
     r = L["research"]
-    return f'''<aside class="research"><header><span class="ico">{ICON["globe"]}</span><div><span class="rs-k">🔍 سؤال بحث</span><h4>{r["title"]}</h4></div></header>
+    return f'''<aside class="research">{stk("🧐")}<header><span class="ico">{ICON["globe"]}</span><div><span class="rs-k">سؤال بحث</span><h4>{r["title"]}</h4></div></header>
   <p>{r["q"]}</p>
   <dl><div><dt>مصادر مقترحة</dt><dd>مكتبة المدرسة، مقابلة مع صاحب مهنة، موقع تعليميّ موثوق</dd></div><div><dt>المنتَج المطلوب</dt><dd>{r["out"]}</dd></div></dl>
 </aside>'''
@@ -384,7 +390,7 @@ def _lesson(L):
   <div class="prose">{L["explain"]}</div>
   {rules_block(L)}
   {sq}
-  <aside class="warn"><span class="ico">{ICON["warn"]}</span><div><b>⚠️ انتبه! أخطاء شائعة</b><p>{L["warn"]}</p></div></aside>
+  <aside class="warn"><span class="ico">{ICON["warn"]}</span><div><b>انتبه! أخطاء شائعة</b><p>{L["warn"]}</p></div></aside>
 
   <h3 class="h-part"><span>2</span>أمثلة محلولة</h3>
   <div class="exs">{exs}</div>
@@ -401,7 +407,7 @@ def _lesson(L):
 
   <h3 class="h-part"><span>6</span>صح أم خطأ؟</h3>
   <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة.</p>
-  <ol class="tf">{tf_items(L)}</ol>
+  <div class="tf-wrap">{stk("🤨")}<ol class="tf">{tf_items(L)}</ol></div>
 
   <h3 class="h-part"><span>7</span>تقييم إضافي<small dir="ltr">Assessment</small></h3>
   {assess(L)}
@@ -412,7 +418,7 @@ def _lesson(L):
   <h3 class="h-part"><span>9</span>سؤال بحث<small dir="ltr">Research</small></h3>
   {research(L)}
 
-  <aside class="self"><h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي 🌟</h4>
+  <aside class="self">{stk("👏")}<h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
     <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
 
   <h3 class="h-part quiz-part"><span>10</span>نموذج امتحان الدرس مع الحلّ</h3>
@@ -423,7 +429,7 @@ def _lesson(L):
 def exams():
     out = ['''<section class="sheet exams-intro" id="exams">
   <p class="eyebrow">''' + mk("exams") + '''الفصل الأخير</p>
-  <h2 class="h-big">🏆 الامتحانات الرسميّة ونماذج للتدريب</h2>
+  <h2 class="h-big">الامتحانات الرسميّة ونماذج للتدريب</h2>
   <p class="prose-p">هذه أسئلة الامتحانات الرسميّة كما وردت (2015 · 2016 · 2017)، ثم ستّة نماذج جديدة على النمط نفسه تمامًا:
   أربعة أسئلة، <b>5 علامات لكل سؤال</b>، المدّة <b>ساعة ونصف</b>، والمستندات المسموح بها: <b>لا شيء</b>.
   حلّ كل امتحان في وقته الحقيقي ثم صحّح نفسك.</p>
@@ -463,7 +469,7 @@ def summary():
     return f'''
 <section class="sheet summary" id="summary">
   <p class="eyebrow">{mk("summary")}قبل الامتحان</p>
-  <h2 class="h-big">📌 بطاقة المراجعة السريعة</h2>
+  <h2 class="h-big">بطاقة المراجعة السريعة</h2>
   <div class="sum-grid">{"".join(blocks)}</div>
 </section>'''
 
@@ -525,7 +531,7 @@ def main():
         print("answers failed verification:", bad); sys.exit(1)
     print(f"verified {n} answers")
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    book = cover() + index_page() + howto() + "".join(lesson(L) for L in LESSONS) + cards() + exams() + summary()
+    book = cover() + index_page() + "".join(lesson(L) for L in LESSONS) + cards() + exams() + summary()
     page(css, "رياضيات التكميلية المهنية", book, "index.html")
     page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
 

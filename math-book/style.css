@@ -503,3 +503,20 @@ td[dir="ltr"] { text-align: right; color: var(--ink-2); }
 @media (max-width: 640px) { .card-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 420px) { .card-grid { grid-template-columns: 1fr; } }
 @media print { .cards .card { min-height: 72mm; } }
+
+/* ===== Emoji stickers ==================================================== */
+.stk { position: absolute; z-index: 1; font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; font-size: 46px; line-height: 1;
+  inset-inline-end: 12px; top: 10px; pointer-events: none; filter: drop-shadow(0 3px 4px rgba(0,0,0,.12)); }
+.stk.bottom { top: auto; bottom: 10px; inset-inline-end: 14px; font-size: 52px; }
+.stk.sm { font-size: 34px; top: 8px; inset-inline-end: 10px; }
+.stk.mini { position: static; font-size: 30px; filter: none; flex: none; align-self: center; }
+.open-q, .research, .tf-wrap, .sk-p, .lvl-4, .sel-card { position: relative; }
+.open-q { padding-inline-end: 70px; }
+.research header { padding-inline-end: 56px; }
+.tf-wrap .stk { top: -46px; }
+.lvl-4 .stk { top: 6px; }
+.sel-card header .sel-fmt { margin-inline-end: 38px; }
+.research > p { padding-inline-end: 56px; }
+.self { position: relative; }
+.self .stk { top: auto; bottom: 10px; inset-inline-end: 14px; }
+.self table { width: calc(100% - 56px); }

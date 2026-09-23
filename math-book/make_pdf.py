@@ -98,7 +98,7 @@ def main():
         json.dump(pages, open(P("pages.json"), "w"), ensure_ascii=False, indent=1, sort_keys=True)
         prev = pages
     run("node", "pdf.js", "index.html", "_cover.pdf", "cover")
-    titles = [(1, "الفهرس", "index"), (1, "كيف تستعمل هذا الكتاب؟", "howto")]
+    titles = [(1, "الفهرس", "index")]
     for L in content.LESSONS:
         titles.append((1, f'الدرس {L["num"]}: {L["title"]}', L["id"]))
         titles += [(2, p, f'{L["id"]}-{i + 1}') for i, p in enumerate(__import__("build").PARTS)]
