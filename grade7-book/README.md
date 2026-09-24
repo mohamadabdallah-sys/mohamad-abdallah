@@ -10,7 +10,8 @@ It has the same design as `../math-book`, with a royal-blue cover. It uses Engli
 - `answers.html` / `دليل-المعلم-الصف-السابع.pdf`: the teacher answer key.
 
 ## Contents
-- An index with page numbers and a diagnostic test (ردم).
+- A clear index (units → lessons → page) and a lesson-sections table, then a diagnostic test (ردم).
+- Geometry questions carry figures drawn to scale from their data (`qfigs.py`, marker `[[fig:key]]`).
 - Four units, one per term period, each with an opener page: the lessons, the number of sessions, the dates, the essential questions, SEL and Skills Builder.
   - Unit 1: numbers — powers, primes, fractions, decimals.
   - Unit 2: signed numbers and the coordinate plane.

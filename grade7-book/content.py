@@ -86,14 +86,14 @@ EXAMS = [
                                    (r"html:قميص بـ 45 دولارًا عليه حسم 20%. كم ندفع؟", r"html:36 دولارًا", eq("45*Rational(8,10)", "36"))]),
     ]),
     dict(id="exam-u4", title="امتحان المحور الرابع: الهندسة", sub="المثلّثات المتساوية · الزوايا والمستقيمات · المنصّفات", time="50 دقيقة", qs=[
-        ("احسب", "Find the angles", [(r"html:في \(EFG\): \(\widehat{EFG}=40^\circ\)، \(\widehat{EGF}=70^\circ\). احسب \(\widehat{FEG}\) وحدّد طبيعته.", r"html:\(70^\circ\)؛ متساوي الساقين رأسه F", eq("180-40-70", "70"))]),
-        ("الزوايا", "Angles and parallel lines", [(r"html:\((AB)\parallel(CD)\) والقاطع يصنع \(\widehat{AGH}=50^\circ\). احسب \(\widehat{GHD}\) و\(\widehat{GHC}\).",
+        ("احسب", "Find the angles", [(r"html:في \(EFG\): \(\widehat{EFG}=40^\circ\)، \(\widehat{EGF}=70^\circ\). احسب \(\widehat{FEG}\) وحدّد طبيعته. [[fig:t-efg]]", r"html:\(70^\circ\)؛ متساوي الساقين رأسه F", eq("180-40-70", "70"))]),
+        ("الزوايا", "Angles and parallel lines", [(r"html:\((AB)\parallel(CD)\) والقاطع يصنع \(\widehat{AGH}=50^\circ\). احسب \(\widehat{GHD}\) و\(\widehat{GHC}\). [[fig:par-agh]]",
                                                    r"html:\(50^\circ\) و\(130^\circ\)", eq("180-50", "130")),
-                                                  (r"html:شبه منحرف: \(\widehat{D}=120^\circ\)، \(\widehat{C}=126^\circ\). احسب \(\widehat{A}\) و\(\widehat{B}\).", r"html:\(60^\circ\) و\(54^\circ\)",
+                                                  (r"html:شبه منحرف: \(\widehat{D}=120^\circ\)، \(\widehat{C}=126^\circ\). احسب \(\widehat{A}\) و\(\widehat{B}\). [[fig:trap]]", r"html:\(60^\circ\) و\(54^\circ\)",
                                                    [eq("180-120", "60"), eq("180-126", "54")])]),
-        ("برهن", "Prove", [(r"html:\(M\) منتصف \([AB]\) و\([CD]\). برهن أنّ \(AMC\) و\(BMD\) متساويان.", r"html:S-A-S (زاويتان متقابلتان بالرأس)", truth("True"))]),
-        ("المنصّفات", "Bisectors", [(r"html:\(M\) على المنصّف العموديّ لـ \([AB]\)، \(MA=2x+3\) و\(MB=11\). أوجد \(x\).", r"html:\(x=4\)", eq("(11-3)/2", "4")),
-                                   (r"html:\(ABC\) متساوي الساقين رأسه \(A\)، \(\widehat{A}=100^\circ\)، و\([BM]\) منصّف \(\widehat{B}\). احسب \(\widehat{ABM}\).", r"html:\(20^\circ\)",
+        ("برهن", "Prove", [(r"html:\(M\) منتصف \([AB]\) و\([CD]\). برهن أنّ \(AMC\) و\(BMD\) متساويان. [[fig:mid-x]]", r"html:S-A-S (زاويتان متقابلتان بالرأس)", truth("True"))]),
+        ("المنصّفات", "Bisectors", [(r"html:\(M\) على المنصّف العموديّ لـ \([AB]\)، \(MA=2x+3\) و\(MB=11\). أوجد \(x\). [[fig:perp-x]]", r"html:\(x=4\)", eq("(11-3)/2", "4")),
+                                   (r"html:\(ABC\) متساوي الساقين رأسه \(A\)، \(\widehat{A}=100^\circ\)، و\([BM]\) منصّف \(\widehat{B}\). احسب \(\widehat{ABM}\). [[fig:iso-bis-100]]", r"html:\(20^\circ\)",
                                     eq("(180-100)/2/2", "20"))]),
     ]),
     dict(id="final-1", title="امتحان نهاية الفصل الأوّل", sub="المحوران الأوّل والثاني", time="ساعة ونصف", qs=[
@@ -113,6 +113,6 @@ EXAMS = [
                                    (r"html:عمر أحمد 20 سنة ووالده 55. بعد كم سنة يصبح عمر الأب ضعف عمر أحمد؟", r"html:15 سنة", eq("55+15", "2*(20+15)"))]),
         ("التناسب", "Proportionality", [(r"html:وصفة لـ 4 أشخاص تحتاج 300 g طحين. كم نحتاج لـ 10 أشخاص؟", r"html:750 g", eq("300/4*10", "750"))]),
         ("الهندسة", "Geometry", [(r"html:زاويتان متكاملتان، إحداهما تزيد على الأخرى \(40^\circ\). احسبهما.", r"html:\(70^\circ\) و\(110^\circ\)", eq("70+110", "180")),
-                                 (r"html:\(C\) على المنصّف العموديّ لـ \([AB]\). ما طبيعة \(CAB\)؟ علّل.", r"html:متساوي الساقين (\(CA=CB\))", truth("True"))]),
+                                 (r"html:\(C\) على المنصّف العموديّ لـ \([AB]\). ما طبيعة \(CAB\)؟ علّل. [[fig:perp-c]]", r"html:متساوي الساقين (\(CA=CB\))", truth("True"))]),
     ]),
 ]

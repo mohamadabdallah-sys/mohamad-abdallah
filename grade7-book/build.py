@@ -4,6 +4,7 @@ import base64, json, os, re, subprocess, sys, urllib.request
 from content import LESSONS, EXAMS, UNITS, DIAG
 import verify
 from illustrations import FIGS
+from qfigs import render as qfig
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGES_FILE = os.path.join(HERE, "pages.json")
@@ -180,30 +181,44 @@ def cards():
 </section>'''
 
 
+SHORT = ["تمهيد", "الشرح", "أمثلة", "تطبيقات", "أنشطة", "تمارين", "مستويات", "مهارات", "صح/خطأ", "تقييم", "عاطفيّ", "بحث", "امتحان"]
+
+
 def index_page():
-    blocks = []
+    def row(href, title, page, cls="", num=""):
+        n = f'<span class="toc-n">{num}</span>' if num else ""
+        return f'<a class="ix-row {cls}" href="#{href}">{n}<span class="ix-t">{title}</span><i></i><b>{page}</b></a>'
+    units = []
     for U in UNITS:
-        les = []
+        les = "".join(row(L["id"], L["title"], pg(L["id"]), "ix-les", L["num"])
+                      for L in LESSONS if L["id"] in U["lessons"])
+        units.append(f'''<div class="ix-unit c-{U["color"]}">
+  <a class="ix-uh" href="#unit-{U["num"]}"><span class="ix-un">{U["num"]}</span><span class="ix-t">المحور {U["num"]}: {U["title"]}</span><small dir="ltr">{U["en"]}</small><i></i><b>{pg("unit-" + str(U["num"]))}</b></a>
+  {les}</div>''')
+    ex = "".join(row(X["id"], X["title"], pg(X["id"]), "ix-sub") for X in EXAMS)
+    back = f'''<div class="ix-unit c-ink">
+  {row("cards", "بطاقات المراجعة MCQ", pg("cards"), "ix-main")}
+  {row("exams", "نماذج الامتحانات", pg("exams"), "ix-main")}
+  <div class="ix-ex">{ex}</div>
+  {row("summary", "بطاقة المراجعة السريعة", pg("summary"), "ix-main")}</div>'''
+    head = "".join(f"<th><span>{p}</span></th>" for p in SHORT)
+    trs = []
+    for U in UNITS:
+        trs.append(f'<tr class="ix-tu c-{U["color"]}"><td colspan="{len(SHORT) + 1}">المحور {U["num"]}: {U["title"]}</td></tr>')
         for L in [L_ for L_ in LESSONS if L_["id"] in U["lessons"]]:
-            parts = " ".join(f'<a href="#{L["id"]}"><span>{p}</span><b>{pg(L["id"] + "-" + str(i + 1))}</b></a>' for i, p in enumerate(PARTS))
-            les.append(f'''<li><a class="ix-l" href="#{L["id"]}"><span class="toc-n">{L["num"]}</span><span class="ix-t">{L["title"]}</span><i></i><b>{pg(L["id"])}</b></a>
-      <p class="ix-parts">{parts}</p></li>''')
-        blocks.append(f'''<div class="ix-block c-{U["color"]}">
-  <a class="ix-h" href="#unit-{U["num"]}"><span class="ix-t">المحور {U["num"]}: {U["title"]}</span><i></i><b>{pg("unit-" + str(U["num"]))}</b></a>
-  <ol class="ix-lessons">{"".join(les)}</ol></div>''')
-    ex = "".join(f'<li><a href="#{X["id"]}"><span>{X["title"]}</span><i></i><b>{pg(X["id"])}</b></a></li>' for X in EXAMS)
-    blocks.append(f'''<div class="ix-block c-ink">
-  <a class="ix-h" href="#cards"><span class="ix-t">بطاقات المراجعة MCQ</span><i></i><b>{pg("cards")}</b></a>
-  <a class="ix-h ix-h2" href="#exams"><span class="ix-t">نماذج الامتحانات</span><i></i><b>{pg("exams")}</b></a>
-  <ol>{ex}</ol>
-  <a class="ix-h ix-h2" href="#summary"><span class="ix-t">بطاقة المراجعة السريعة</span><i></i><b>{pg("summary")}</b></a>
-</div>''')
+            cells = "".join(f'<td><a href="#{L["id"]}">{pg(L["id"] + "-" + str(i + 1))}</a></td>' for i in range(len(PARTS)))
+            trs.append(f'<tr class="c-{U["color"]}"><th class="ix-ln"><a href="#{L["id"]}"><span class="toc-n">{L["num"]}</span>{L["title"]}</a></th>{cells}</tr>')
     return f'''
 <section class="sheet index g7-index" id="index">
   <p class="eyebrow">{mk("index")}Contents</p>
   <h2 class="h-big">الفهرس</h2>
-  <p class="ix-front"><a href="#diag"><span>مراجعة واختبار تشخيصيّ (ردم الفجوات)</span><i></i><b>{pg("diag")}</b></a></p>
-  <div class="ix-grid">{"".join(blocks)}</div>
+  <div class="ix-unit c-ink">{row("diag", "مراجعة واختبار تشخيصيّ (ردم الفجوات)", pg("diag"), "ix-main")}</div>
+  {"".join(units)}
+  {back}
+  <h2 class="h-big ix-h-tab">دليل أقسام الدروس</h2>
+  <p class="ix-note">رقم الصفحة التي يبدأ فيها كلّ قسم من أقسام الدرس.</p>
+  <div class="ix-scroll"><table class="ix-tab"><thead><tr><th class="ix-ln">الدرس</th>{head}</tr></thead>
+  <tbody>{"".join(trs)}</tbody></table></div>
 </section>'''
 
 
@@ -264,7 +279,7 @@ def example_card(i, ex):
                     for t, n in ex["steps"])
     return f'''<article class="ex">
   <header><span class="ex-n">مثال {i}</span>{tag}</header>
-  <div class="ex-q">{dm(ex["q"])}</div>
+  <div class="ex-q">{dm(ex["q"])}{f"[[fig:{ex['fig']}]]" if ex.get("fig") else ""}</div>
   <ol class="steps">{steps}</ol>
 </article>'''
 
@@ -661,6 +676,7 @@ def page(css, title, body, out):
 <footer class="colophon">رياضيات الصفّ السابع · 2026–2027 · إعداد المعلّمَين حسين زعرور ومحمد عبدالله</footer>
 </div>
 '''
+    html = re.sub(r"\[\[fig:([\w-]+)\]\]", lambda m_: qfig(m_.group(1)), html)
     src = os.path.join(HERE, "book.src.html")
     open(src, "w", encoding="utf-8").write(html)
     subprocess.run(["node", os.path.join(HERE, "render.js"), src, os.path.join(HERE, out)], check=True)
