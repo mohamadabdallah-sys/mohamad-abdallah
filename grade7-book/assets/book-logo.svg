@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" class="math-logo" role="img" aria-label="Mathematics · رياضيات">
+  <defs>
+    <path id="ml-top" d="M 34 120 A 86 86 0 0 1 206 120"/>
+    <path id="ml-bot" d="M 28 126 A 92 92 0 0 0 212 126"/>
+  </defs>
+  <circle cx="120" cy="120" r="117" fill="#0E5A34"/>
+  <circle cx="120" cy="120" r="108" fill="none" stroke="#E9B44C" stroke-width="3"/>
+  <circle cx="120" cy="120" r="66" fill="#FFFFFF"/>
+  <circle cx="120" cy="120" r="66" fill="none" stroke="#E9B44C" stroke-width="4"/>
+  <path d="M120 60 V180 M60 120 H180" stroke="#DCE6DF" stroke-width="2"/>
+  <!-- + (top right) -->
+  <rect x="138" y="88" width="30" height="8" rx="3" fill="#0E5A34"/><rect x="149" y="77" width="8" height="30" rx="3" fill="#0E5A34"/>
+  <!-- − (top left) -->
+  <rect x="72" y="88" width="30" height="8" rx="3" fill="#C98E1E"/>
+  <!-- × (bottom left) -->
+  <g transform="rotate(45 87 147)"><rect x="72" y="143" width="30" height="8" rx="3" fill="#0E5A34"/><rect x="83" y="132" width="8" height="30" rx="3" fill="#0E5A34"/></g>
+  <!-- ÷ (bottom right) -->
+  <rect x="138" y="143" width="30" height="8" rx="3" fill="#C98E1E"/><circle cx="153" cy="133" r="4.5" fill="#C98E1E"/><circle cx="153" cy="161" r="4.5" fill="#C98E1E"/>
+  <text font-family="Readex Pro, Arial, sans-serif" font-weight="700" font-size="21" letter-spacing="4.5" fill="#FFFFFF" text-anchor="middle">
+    <textPath href="#ml-top" startOffset="50%">MATHEMATICS</textPath></text>
+  <text font-family="Readex Pro, Arial, sans-serif" font-weight="700" font-size="22" fill="#E9B44C" text-anchor="middle" direction="rtl">
+    <textPath href="#ml-bot" startOffset="50%" dy="0">رياضيات</textPath></text>
+  <g fill="#E9B44C"><path d="M22 120 l5 -5 5 5 -5 5z"/><path d="M208 120 l5 -5 5 5 -5 5z"/></g>
+</svg>

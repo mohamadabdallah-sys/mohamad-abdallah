@@ -1,0 +1,7 @@
+{
+  "name": "arabic-math-book",
+  "private": true,
+  "description": "Builds the Arabic math book (KaTeX pre-rendering)",
+  "scripts": { "build": "python3 build.py", "pdf": "node pdf.js" },
+  "dependencies": { "katex": "0.16.11" }
+}
