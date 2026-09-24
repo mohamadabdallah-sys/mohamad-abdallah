@@ -124,7 +124,7 @@ def triangles():
   <path class="curve" d="M52 170 A 22 22 0 0 0 43 152"/><path class="curve" d="M222 170 A 22 22 0 0 0 213 152"/>
   <g class="lt" text-anchor="middle" direction="ltr"><text x="30" y="190">A</text><text x="150" y="190">B</text><text x="70" y="52">C</text>
   <text x="200" y="190">D</text><text x="320" y="190">E</text><text x="240" y="52">F</text></g>
-  <text x="180" y="212" text-anchor="middle" class="lt acc">C-A-C</text>''')
+  <text x="180" y="212" text-anchor="middle" class="lt acc">S-A-S</text>''')
 
 
 def angles():
@@ -158,7 +158,7 @@ FIGS = {
     "algebra": (algebra, "نموذج المساحة: التوسيع والتحليل وجهان لعمليّة واحدة"),
     "equations": (equations, "المعادلة ميزان متوازن (نشاط الميزان في الخطّة)"),
     "proportion": (proportion, "التناسب: النقاط على مستقيم يمرّ بالأصل"),
-    "triangles": (triangles, "مثلّثان متساويان: ضلعان والزاوية المحصورة (C-A-C)"),
+    "triangles": (triangles, "مثلّثان متساويان: ضلعان والزاوية المحصورة (S-A-S)"),
     "angles": (angles, "الزوايا عند مستقيمين متوازيين وقاطع"),
     "bisectors": (bisectors, "«لمن السبق اليوم؟»: نقطة على المنصّف العموديّ تبعد البعد نفسه عن A وB"),
 }
