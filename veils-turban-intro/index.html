@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veils &amp; Turban Intro</title>
+<style>
+  :root { --bg: #050407; --ink: #d9b56a; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #replay {
+    position: fixed; right: 16px; bottom: 16px; z-index: 2;
+    font: 500 13px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: rgba(10, 8, 6, .55); border: 1px solid rgba(217, 181, 106, .45);
+    padding: 10px 14px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(6px);
+    opacity: .75; transition: opacity .2s;
+  }
+  #replay:hover { opacity: 1; }
+  body.capture #replay { display: none; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<button id="replay" type="button">↻ Replay</button>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+
+const params = new URLSearchParams(location.search);
+const CAPTURE = params.has('capture');
+if (CAPTURE) document.body.classList.add('capture');
+const DURATION = 11;
+
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const prog = (t, start, dur) => clamp((t - start) / dur);
+const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+const easeOutExpo = t => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+const easeInOutCubic = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeOutBack = (t, s = 1.4) => 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2);
+function rand(seed) { const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: CAPTURE });
+renderer.setPixelRatio(CAPTURE ? 1 : Math.min(devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050407);
+scene.fog = new THREE.FogExp2(0x050407, 0.055);
+const camera = new THREE.PerspectiveCamera(32, 16 / 9, 0.05, 100);
+
+// ---------- logo parts ----------
+const meta = await (await fetch('assets/parts.json')).json();
+const K = 4.0 / meta.w;                       // logo is 4 world units wide
+const loader = new THREE.TextureLoader();
+const load = src => new Promise(r => loader.load(src, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; r(t); }));
+
+const vert = /* glsl */`
+  varying vec2 vUv; varying vec3 vWorld; varying vec3 vNormalW;
+  void main() {
+    vUv = uv;
+    vec4 w = modelMatrix * vec4(position, 1.0);
+    vWorld = w.xyz;
+    vNormalW = normalize(mat3(modelMatrix) * vec3(0.0, 0.0, 1.0));
+    gl_Position = projectionMatrix * viewMatrix * w;
+  }`;
+const frag = /* glsl */`
+  uniform sampler2D map; uniform float uOpacity, uReveal, uSide, uShade, uSweep, uSweep2, uTime, uGlow;
+  uniform vec3 uCam;
+  varying vec2 vUv; varying vec3 vWorld; varying vec3 vNormalW;
+  void main() {
+    vec4 tex = texture2D(map, vUv);
+    // top-to-bottom reveal with a hot leading edge
+    float edge = (1.0 - vUv.y) - uReveal * 1.15 + 0.05;
+    if (edge > 0.0) discard;
+    float hot = smoothstep(-0.08, 0.0, edge) * step(uReveal, 0.999);
+    float a = tex.a;
+    if (uSide > 0.5) { if (a < 0.45) discard; a = 1.0; }
+    vec3 base = tex.rgb;
+    float lum = dot(base, vec3(0.299, 0.587, 0.114));
+    vec3 col;
+    if (uSide > 0.5) {
+      col = base * vec3(0.55, 0.42, 0.26) * uShade;
+    } else {
+      vec3 N = normalize(vNormalW);
+      vec3 V = normalize(uCam - vWorld);
+      vec3 L = normalize(vec3(-0.4, 0.6, 1.0));
+      vec3 H = normalize(L + V);
+      float diff = 0.75 + 0.35 * max(dot(N, L), 0.0);
+      float spec = pow(max(dot(N, H), 0.0), 40.0) * 0.6;
+      float s1 = exp(-pow((vWorld.x + vWorld.y * 0.55 - uSweep) / 0.22, 2.0));
+      float s2 = exp(-pow((vWorld.x - vWorld.y * 0.55 - uSweep2) / 0.3, 2.0));
+      col = base * diff + vec3(1.0, 0.86, 0.6) * (spec + (s1 * 1.6 + s2 * 1.1) * (0.35 + lum));
+    }
+    col += vec3(1.0, 0.8, 0.45) * hot * 2.2 * uGlow;
+    gl_FragColor = vec4(col, a * uOpacity);
+  }`;
+
+const LAYERS = 16, DEPTH = 0.07;
+const parts = {};
+const root = new THREE.Group();
+scene.add(root);
+const shared = { uSweep: { value: -9 }, uSweep2: { value: -9 }, uTime: { value: 0 }, uCam: { value: new THREE.Vector3() } };
+
+await Promise.all(meta.parts.map(async p => {
+  const tex = await load(`assets/${p.name}.png`);
+  const pivot = new THREE.Group();                     // animated transform
+  pivot.position.set((p.x + p.w / 2 - meta.w / 2) * K, -(p.y + p.h / 2 - meta.h / 2) * K, 0);
+  const geo = new THREE.PlaneGeometry(p.w * K, p.h * K);
+  const u = { map: { value: tex }, uOpacity: { value: 0 }, uReveal: { value: 1 }, uGlow: { value: 1 }, ...shared };
+  const mats = [];
+  for (let i = LAYERS; i >= 0; i--) {
+    const side = i > 0;
+    const m = new THREE.ShaderMaterial({
+      uniforms: { ...u, uSide: { value: side ? 1 : 0 }, uShade: { value: lerp(1.0, 0.35, i / LAYERS) } },
+      vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: side,
+      side: THREE.DoubleSide, fog: false,
+    });
+    // uniforms objects must stay shared so one write drives every layer
+    for (const k of Object.keys(u)) m.uniforms[k] = u[k];
+    const mesh = new THREE.Mesh(geo, m);
+    mesh.position.z = -DEPTH * (i / LAYERS);
+    mesh.renderOrder = side ? 0 : 1;
+    pivot.add(mesh); mats.push(m);
+  }
+  root.add(pivot);
+  parts[p.name] = { pivot, u, home: pivot.position.clone() };
+}));
+
+// ---------- floor reflection ----------
+const floorY = -(meta.h / 2) * K - 0.18;
+const mirror = new Reflector(new THREE.PlaneGeometry(30, 30), {
+  textureWidth: 1024, textureHeight: 1024, color: 0x3a3228, clipBias: 0.003,
+});
+mirror.rotation.x = -Math.PI / 2; mirror.position.y = floorY;
+scene.add(mirror);
+// fade the mirror out with distance so it reads as polished black stone
+const fadeCanvas = document.createElement('canvas'); fadeCanvas.width = fadeCanvas.height = 256;
+{
+  const g = fadeCanvas.getContext('2d');
+  const grd = g.createRadialGradient(128, 128, 10, 128, 128, 128);
+  grd.addColorStop(0, 'rgba(5,4,7,0.3)'); grd.addColorStop(0.12, 'rgba(5,4,7,0.75)'); grd.addColorStop(0.3, 'rgba(5,4,7,1)'); grd.addColorStop(1, 'rgba(5,4,7,1)');
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+}
+const fadePlane = new THREE.Mesh(new THREE.PlaneGeometry(34, 34),
+  new THREE.MeshBasicMaterial({ map: Object.assign(new THREE.CanvasTexture(fadeCanvas), { colorSpace: THREE.SRGBColorSpace }), transparent: true, depthWrite: false }));
+fadePlane.rotation.x = -Math.PI / 2; fadePlane.position.set(0, floorY + 0.002, 0.5);
+scene.add(fadePlane);
+
+// ---------- glow, flare, dust ----------
+function spriteTex(draw, w = 256, h = 256) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const softTex = spriteTex((g, w, h) => {
+  const grd = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+  grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.25, 'rgba(255,255,255,.45)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, w, h);
+});
+const streakTex = spriteTex((g, w, h) => {
+  const grd = g.createLinearGradient(0, 0, w, 0);
+  grd.addColorStop(0, 'rgba(255,255,255,0)'); grd.addColorStop(0.5, 'rgba(255,255,255,1)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, w, h);
+  g.globalCompositeOperation = 'destination-in';
+  const v = g.createLinearGradient(0, 0, 0, h);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(0.5, 'rgba(0,0,0,1)'); v.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = v; g.fillRect(0, 0, w, h);
+}, 512, 32);
+const additive = (map, color, opacity = 1) => new THREE.SpriteMaterial({
+  map, color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, fog: false });
+
+const backGlow = new THREE.Sprite(additive(softTex, 0x6b4a1c, 0));
+backGlow.renderOrder = 5; backGlow.scale.set(9, 6, 1); backGlow.position.set(0, 0.1, -1.6); scene.add(backGlow);
+const streak = new THREE.Sprite(additive(streakTex, 0xffd9a0, 0));
+streak.renderOrder = 10; scene.add(streak);
+const flareCore = new THREE.Sprite(additive(softTex, 0xfff0d0, 0));
+flareCore.renderOrder = 10; scene.add(flareCore);
+
+const DUST = 700;
+const dustGeo = new THREE.BufferGeometry();
+const dustBase = new Float32Array(DUST * 3), dustPos = new Float32Array(DUST * 3), dustSeed = new Float32Array(DUST);
+for (let i = 0; i < DUST; i++) {
+  dustBase[i * 3] = (rand(i) - 0.5) * 12; dustBase[i * 3 + 1] = (rand(i + 1000) - 0.5) * 6; dustBase[i * 3 + 2] = (rand(i + 2000) - 0.7) * 8;
+  dustSeed[i] = rand(i + 3000);
+}
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  map: softTex, color: 0xe0b060, size: 0.045, transparent: true, opacity: 0, blending: THREE.AdditiveBlending,
+  depthWrite: false, sizeAttenuation: true }));
+scene.add(dust);
+
+// ---------- post ----------
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.55, 0.72);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+const finish = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uFade: { value: 0 }, uBars: { value: 0 }, uAspect: { value: 16 / 9 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform sampler2D tDiffuse; uniform float uTime, uFade, uBars, uAspect; varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)) + uTime * 17.0) * 43758.5453); }
+    void main(){
+      vec2 d = vUv - 0.5;
+      float ca = 0.0018 * dot(d, d) * 4.0;
+      vec3 c = vec3(texture2D(tDiffuse, vUv + d * ca).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - d * ca).b);
+      float vig = smoothstep(0.95, 0.25, length(d * vec2(uAspect > 1.0 ? 1.0 : 0.75, 1.0)));
+      c *= mix(0.35, 1.0, vig);
+      c += (hash(vUv * 900.0) - 0.5) * 0.035;
+      c *= uFade;
+      // cinematic 2.39:1 letterbox (landscape only)
+      float target = uAspect > 1.2 ? (1.0 - uAspect / 2.39) * 0.5 : 0.0;
+      float bar = target * uBars;
+      if (vUv.y < bar || vUv.y > 1.0 - bar) c = vec3(0.0);
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+});
+composer.addPass(finish);
+
+// ---------- layout ----------
+let baseDist = 8;
+function resize(w = innerWidth, h = innerHeight) {
+  renderer.setSize(w, h, !CAPTURE);
+  composer.setSize(w, h);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  finish.uniforms.uAspect.value = w / h;
+  const vf = THREE.MathUtils.degToRad(camera.fov);
+  const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+  const needW = camera.aspect > 1 ? 5.6 : 4.7, needH = 5.4;   // logo plus breathing room
+  baseDist = Math.max((needH / 2) / Math.tan(vf / 2), (needW / 2) / Math.tan(hf / 2));
+}
+window.setViewport = resize;
+if (!CAPTURE) addEventListener('resize', () => resize());
+resize();
+
+// ---------- timeline ----------
+const line1 = ['V', 'e', 'i', 'l', 's'];
+const line2 = ['T', 'u', 'r', 'b', 'a', 'n'];
+const tagline = ['tB1', 'tY', 'tB2', 'tA', 'tT', 'tO', 'tU', 'tL'];
+
+function renderAt(t) {
+  // camera: low, close three-quarter view gliding round to a hero front shot
+  const c = easeInOutCubic(prog(t, 0, 7.2));
+  const ang = lerp(0.62, 0.0, c) + Math.sin(t * 0.5) * 0.015 * c;
+  const dist = baseDist * lerp(0.5, 1.0, c) * lerp(1.0, 0.94, prog(t, 7.2, DURATION - 7.2));
+  const h = lerp(0.2, 0.28, c);
+  camera.position.set(Math.sin(ang) * dist, h, Math.cos(ang) * dist);
+  camera.lookAt(lerp(1.3, 0, c), lerp(0.55, 0.0, c), 0);
+  camera.rotateZ(lerp(-0.05, 0, c));
+  shared.uCam.value.copy(camera.position);
+  shared.uTime.value = t;
+
+  // figure: drawn in from the top, turning towards us
+  {
+    const P = parts.figure, k = prog(t, 0.9, 2.6), e = easeOutCubic(k);
+    P.u.uReveal.value = easeInOutCubic(k);
+    P.u.uOpacity.value = clamp(k * 4);
+    P.pivot.position.set(P.home.x + 0.3 * (1 - e), P.home.y, lerp(-0.8, 0, e));
+    P.pivot.rotation.set(0, lerp(-0.7, 0, e), 0);
+  }
+  // "Veils" dives in from behind the camera
+  line1.forEach((n, i) => {
+    const P = parts[n], k = prog(t, 2.0 + i * 0.13, 1.35), e = easeOutExpo(k), b = easeOutBack(clamp(k * 1.1), 1.2);
+    P.u.uOpacity.value = clamp(k * 3.5);
+    P.pivot.position.set(P.home.x + (rand(i + 7) - 0.5) * 1.2 * (1 - e), P.home.y + 0.6 * (1 - e), lerp(3.2, 0, e));
+    P.pivot.rotation.set(lerp(-1.3, 0, b), lerp((rand(i) - 0.5) * 1.6, 0, b), lerp((rand(i + 3) - 0.5) * 0.8, 0, e));
+  });
+  // "Turban" flips up out of the dark
+  line2.forEach((n, i) => {
+    const P = parts[n], k = prog(t, 2.75 + i * 0.11, 1.4), e = easeOutExpo(k), b = easeOutBack(clamp(k * 1.1), 1.1);
+    P.u.uOpacity.value = clamp(k * 3.5);
+    P.pivot.position.set(P.home.x, P.home.y - 0.9 * (1 - e), lerp(-2.6, 0, e));
+    P.pivot.rotation.set(lerp(1.5, 0, b), 0, 0);
+  });
+  // "BY BATOUL" settles in with converging spacing
+  tagline.forEach((n, i) => {
+    const P = parts[n], k = prog(t, 5.3 + i * 0.07, 1.3), e = easeOutCubic(k);
+    P.u.uOpacity.value = e;
+    P.pivot.position.set(P.home.x * lerp(1.55, 1, e), P.home.y - 0.12 * (1 - e), 0);
+    P.pivot.rotation.set(0, lerp(0.8, 0, e), 0);
+  });
+
+  // light sweeps across the gold
+  shared.uSweep.value = lerp(-4.5, 4.5, easeInOutCubic(prog(t, 4.3, 1.5)));
+  shared.uSweep2.value = lerp(-4.5, 4.5, easeInOutCubic(prog(t, 8.1, 1.6)));
+
+  // flare rides the first sweep, then blooms at the end
+  const f1 = prog(t, 4.3, 1.5), f2 = prog(t, 8.1, 1.6);
+  const flareOn = Math.sin(Math.PI * f1) * (f1 > 0 && f1 < 1) + 0.8 * Math.sin(Math.PI * f2) * (f2 > 0 && f2 < 1);
+  const intro = Math.sin(Math.PI * prog(t, 0.2, 1.6));     // opening light streak
+  const fx = f2 > 0 ? lerp(-2.4, 2.4, easeInOutCubic(f2)) : f1 > 0 ? lerp(-2.4, 2.4, easeInOutCubic(f1)) : 0;
+  const fy = f2 > 0 ? 0.9 : f1 > 0 ? 0.35 : 0.1;
+  streak.position.set(fx, fy, 0.6); flareCore.position.copy(streak.position);
+  streak.material.opacity = 0.85 * Math.max(flareOn, intro);
+  streak.scale.set(lerp(1, 9, Math.max(flareOn, intro)), 0.07, 1);
+  flareCore.material.opacity = 0.9 * Math.max(flareOn, intro * 0.8);
+  flareCore.scale.setScalar(lerp(0.2, 0.8, Math.max(flareOn, intro)));
+
+  backGlow.material.opacity = 0.55 * clamp(prog(t, 0.8, 3)) + 0.25 * flareOn;
+  bloom.strength = 0.5 + 0.55 * flareOn + 0.4 * Math.exp(-Math.pow((t - 3.3) / 0.35, 2));
+
+  // dust drifting through the light
+  for (let i = 0; i < DUST; i++) {
+    const s = dustSeed[i];
+    dustPos[i * 3] = dustBase[i * 3] + Math.sin(t * 0.3 + s * 20) * 0.15 + t * 0.05 * (s - 0.5);
+    dustPos[i * 3 + 1] = ((dustBase[i * 3 + 1] + t * (0.04 + s * 0.08) + 3) % 6) - 3;
+    dustPos[i * 3 + 2] = dustBase[i * 3 + 2];
+  }
+  dustGeo.attributes.position.needsUpdate = true;
+  dust.material.opacity = 0.75 * prog(t, 0, 1.5);
+
+  finish.uniforms.uTime.value = t;
+  finish.uniforms.uFade.value = prog(t, 0, 0.6) * (1 - prog(t, DURATION - 0.8, 0.8));
+  finish.uniforms.uBars.value = easeInOutCubic(prog(t, 0, 1.2));
+  for (const k in parts) parts[k].pivot.visible = parts[k].u.uOpacity.value > 0.003;
+  composer.render();
+}
+window.renderAt = renderAt;
+window.DURATION = DURATION;
+
+if (!CAPTURE) {
+  let start = performance.now();
+  document.getElementById('replay').onclick = () => { start = performance.now(); };
+  renderer.setAnimationLoop(() => renderAt(((performance.now() - start) / 1000) % DURATION));
+}
+window.ready = true;
+</script>
+</body>
+</html>
