@@ -5,6 +5,7 @@ from content import LESSONS, EXAMS, UNITS, DIAG
 import verify
 from illustrations import FIGS
 from qfigs import render as qfig
+import extras
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGES_FILE = os.path.join(HERE, "pages.json")
@@ -327,18 +328,14 @@ PROMPTS = ["ما المعطى؟ ما المطلوب؟", "ما القاعدة أ�
 
 def skills(L):
     sk = L["skills"]
-    strip = "".join(f'<li><b>{i + 1}</b><span>{a}</span><small dir="ltr">{e}</small></li>' for i, (a, e) in enumerate(STEPS))
     model = "".join(f'<li><span class="sk-k"><b>{i + 1}</b>{STEPS[i][0]}</span><p>{t}</p></li>'
                     for i, t in enumerate(sk["model"]["steps"]))
-    prac = "".join(f'''<article class="sk-p">{stk("🤔", "bottom")}{SKB}<header><span class="q-n">{i + 1}</span><p>{ex["q"]}</p></header>
-      <ol class="sk-lines">{"".join(f'<li><span class="sk-k"><b>{j + 1}</b>{STEPS[j][0]}</span><em>{PROMPTS[j]}</em><i></i></li>' for j in range(4))}</ol>
-    </article>''' for i, ex in enumerate(sk["practice"]))
-    return f'''<div class="skills">
+    ex = sk["practice"][0]
+    boxes = "".join(f'<li><span class="sk-k"><b>{j + 1}</b>{STEPS[j][0]}</span><i></i></li>' for j in range(4))
+    return f'''<div class="skills sk-compact">
   <p class="sk-banner"><span>مهارة المحور: <b>{sk["skill"]}</b></span><span>{sk["step"]}</span></p>
-  <ol class="sk-strip">{strip}</ol>
   <article class="sk-model"><header>{SKB}<span class="tag">مسألة محلولة</span><p>{sk["model"]["q"]}</p></header><ol class="sk-steps">{model}</ol></article>
-  <h4 class="sk-your">دورك الآن: حلّ باتّباع الخطوات الأربع</h4>
-  {prac}
+  <article class="sk-p"><header><span class="tag">دورك الآن</span><p>{ex["q"]}</p></header><ol class="sk-boxes">{boxes}</ol></article>
 </div>'''
 
 
@@ -489,6 +486,7 @@ def _lesson(L):
   {intro(L)}
 
   <figure class="lesson-fig">{FIGS[L["fig"]][0]()}<figcaption>{FIGS[L["fig"]][1]}</figcaption></figure>
+  {extras.fact_box(L)}
 
   <h3 class="h-part"><span>0</span>الشرح</h3>
   <div class="prose">{L["explain"]}</div>
@@ -534,6 +532,7 @@ def _lesson(L):
 
   <h3 class="h-part quiz-part"><span>10</span>نموذج امتحان الدرس مع الحلّ</h3>
   {quiz(L)}
+  {extras.badge(L)}
 </section>'''
 
 
@@ -612,7 +611,7 @@ def answers():
                 k += 1
                 hint = f'<small class="hint">تلميح: {ex["hint"]}</small>' if ex.get("hint") else ""
                 items.append(f'<li><span class="a-n">{k}</span><div>{ex["a"] if ex["ahtml"] else m(ex["a"])}{hint}</div></li>')
-        sk = "".join(f'<li><span class="a-n">{i + 1}</span><div>{ex["a"]}</div></li>' for i, ex in enumerate(L["skills"]["practice"]))
+        sk = "".join(f'<li><span class="a-n">{i + 1}</span><div>{ex["a"]}</div></li>' for i, ex in enumerate(L["skills"]["practice"][:1]))
         rc = "".join(f'<li><span class="a-n">{i + 1}</span><div>{a}</div></li>' for i, (_, a, _) in enumerate(L["intro"]["recall"]))
         df = "".join(f'<li><span class="a-n">{name[0]}{i + 1}</span><div>{t["a"]}</div></li>'
                      for key, _, name, _ in DIFF for i, t in enumerate(L["diff"][key]))
@@ -675,7 +674,10 @@ def main():
     for U in UNITS:
         body.append(unit_page(U))
         body += [lesson(L) for L in LESSONS if L["id"] in U["lessons"]]
-    book = cover() + index_page() + diag_page() + "".join(body) + cards() + exams() + summary()
+    front = extras.title_page(mk) + extras.howto_page(mk, ICON)
+    back = extras.certificate(mk) + extras.back_cover(len(LESSONS), "1000")
+    book = (cover() + front + index_page() + extras.journey(mk, UNITS, LESSONS) + diag_page() + "".join(body)
+            + cards() + exams() + summary() + back)
     page(css, "رياضيات الصف السادس", book, "index.html")
     page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
 

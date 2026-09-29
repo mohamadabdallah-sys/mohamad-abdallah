@@ -19,6 +19,12 @@ It has the same design as the grade-7 book (`../grade7-book`), with a burgundy c
   5. Geometry: lines and circles, angles, triangles, areas.
   6. Proportionality and statistics: ratio, algebraic expressions, percentages, proportional tables, statistics.
 - Every lesson has the parts of the previous books, plus a new **«ببساطة»** box: the idea in simple words, step by step, and a memory tip.
+- Finishing touches (`extras.py`):
+  - the owl mascot «نَبيه» with a «هل تعلم؟» fact in every lesson;
+  - an inner title page with a copyright notice, and a "how to use your book" page;
+  - a journey map for tracking progress, and an end-of-lesson badge;
+  - a certificate of excellence and a back cover.
+- Skills Builder is compact: one solved problem in a 2×2 step grid and one practice problem.
 - Figures:
   - A drawn illustration for each lesson (`illustrations.py`).
   - Question figures drawn to scale (`qfigs.py`), added with markers such as `[[fig:nl|-5|5|1|A@-3]]`. They cover number lines, factor trees, fraction bars, percent grids, circles, angles, triangles, area shapes, bar and line charts, dot plots and a place-value table.

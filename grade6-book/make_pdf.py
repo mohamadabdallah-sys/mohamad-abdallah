@@ -78,9 +78,12 @@ def decorate(pdf_in, first_number, found, out, cover=None, toc_titles=None):
     for i, page in enumerate(body):
         frame(page, first_number + i, colors[i], logo)
     doc = pymupdf.open()
-    if cover:
-        doc.insert_pdf(pymupdf.open(cover))
+    cov = pymupdf.open(cover) if cover else None
+    if cov:
+        doc.insert_pdf(cov, from_page=0, to_page=0)
     doc.insert_pdf(body)
+    if cov and len(cov) > 1:                      # back cover goes last
+        doc.insert_pdf(cov, from_page=1, to_page=1)
     if toc_titles:
         offset = 1 if cover else 0
         doc.set_toc([[lvl, t, found[k] + 1 + offset] for lvl, t, k in toc_titles if k in found])
@@ -102,7 +105,7 @@ def main():
         prev = pages
     run("node", "logo.js")
     run("node", "pdf.js", "index.html", "_cover.pdf", "cover")
-    titles = [(1, "الفهرس", "index"), (1, "مراجعة واختبار تشخيصيّ", "diag")]
+    titles = [(1, "كيف تستعمل كتابك؟", "howto"), (1, "الفهرس", "index"), (1, "خريطة رحلتي", "journey"), (1, "مراجعة واختبار تشخيصيّ", "diag")]
     for U in content.UNITS:
         titles.append((1, f'المحور {U["num"]}: {U["title"]}', f'unit-{U["num"]}'))
         for L in [L_ for L_ in content.LESSONS if L_["id"] in U["lessons"]]:
@@ -112,6 +115,7 @@ def main():
     titles.append((1, "نماذج الامتحانات", "exams"))
     titles += [(2, X["title"], X["id"]) for X in content.EXAMS]
     titles.append((1, "بطاقة المراجعة السريعة", "summary"))
+    titles.append((1, "شهادة التفوّق", "certificate"))
     n = decorate(P("_body.pdf"), 2, found, BOOK, cover=P("_cover.pdf"), toc_titles=titles)
     print(f"{BOOK}: {n} pages")
     run("node", "pdf.js", "answers.html", "_answers.pdf", "body")
