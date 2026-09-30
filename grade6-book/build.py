@@ -682,6 +682,35 @@ def main():
     page(css, "دليل الإجابات للمعلم", answers(), "answers.html")
 
 
+NUM_RE = re.compile(r"(?<![\w.\\])(?:[−+]?\d[\d.]*(?:[  ]\d{3})*\s?(?:cm²|m²|km²|cm|mm|km/h|km|kg|m|g|h|L|\$)(?![A-Za-z²])"
+                    r"|[−+]\s?\d[\d.]*(?:[  ]\d{3})*(?:\s?[%°])?"
+                    r"|\d{1,3}(?:[  ]\d{3})+(?:\.\d+)?(?:\s?[%°])?"
+                    r"|\d+(?:\.\d+)?\s?[%°])")
+
+
+def isolate_numbers(html):
+    """In Arabic text, keep signed numbers, grouped thousands (60 000), 20% and 90° left-to-right.
+
+    Only plain text between tags is touched: math (\\( … \\)), <svg>, <style> and <script> are skipped."""
+    out, skip = [], 0
+    for part in re.split(r"(<[^>]+>)", html):
+        if part.startswith("<"):
+            tag = part[1:].split()[0].rstrip(">").lower() if len(part) > 1 else ""
+            if tag in ("svg", "style", "script", "title"):
+                skip += 1
+            elif tag in ("/svg", "/style", "/script", "/title"):
+                skip = max(0, skip - 1)
+            out.append(part)
+            continue
+        if skip or not re.search(r"\d", part):
+            out.append(part)
+            continue
+        segs = re.split(r"(\\\(.*?\\\)|\\\[.*?\\\])", part, flags=re.S)
+        out.append("".join(s if s.startswith(("\\(", "\\[")) else NUM_RE.sub(lambda m_: f'<span class="n">{m_.group(0)}</span>', s)
+                           for s in segs))
+    return "".join(out)
+
+
 def page(css, title, body, out):
     html = f'''<title>{title}</title>
 <meta name="description" content="كتاب رياضيات الصفّ السادس 2026–2027: شرح، أمثلة، أنشطة، بناء المهارات، تعلّم اجتماعيّ عاطفيّ، وتمارين متدرّجة">
@@ -697,6 +726,7 @@ def page(css, title, body, out):
 </div>
 '''
     html = re.sub(r"\[\[fig:(.+?)\]\]", lambda m_: qfig(m_.group(1)), html)
+    html = isolate_numbers(html)
     src = os.path.join(HERE, "book.src.html")
     open(src, "w", encoding="utf-8").write(html)
     subprocess.run(["node", os.path.join(HERE, "render.js"), src, os.path.join(HERE, out)], check=True)

@@ -861,3 +861,4 @@ table.mini th { background: color-mix(in srgb, var(--c) 12%, var(--paper)); font
   .keep-sk, .keep-sk .sk-model, .keep-sk .sk-p { break-inside: avoid; }
   .sk-compact .sk-model > header .skb { width: 40px; height: 40px; }
 }
+.n { direction: ltr; unicode-bidi: isolate; display: inline-block; white-space: nowrap; }
