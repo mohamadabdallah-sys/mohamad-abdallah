@@ -513,15 +513,15 @@ def _lesson(L):
   <div class="keep"><h3 class="h-part"><span>0</span>مهامّ متمايزة حسب المستوى<small dir="ltr">Differentiation</small></h3>
   {differentiation(L)}</div>
 
-  <h3 class="h-part"><span>5</span>{SKB}بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
-  {skills(L)}
+  <div class="keep-sk"><h3 class="h-part"><span>5</span>{SKB}بناء المهارات: خطوات حلّ المسألة<small dir="ltr">Skills Builder · Problem-Solving Steps</small></h3>
+  {skills(L)}</div>
 
   <h3 class="h-part"><span>6</span>صح أم خطأ؟</h3>
   <p class="instr">ضع إشارة ✓ في الخانة المناسبة، وصحّح العبارة الخاطئة.</p>
   <div class="tf-wrap">{stk("🤨")}<ol class="tf">{tf_items(L)}</ol></div>
 
-  <h3 class="h-part"><span>7</span>تقييم إضافي<small dir="ltr">Assessment</small></h3>
-  {assess(L)}
+  <div class="keep-sk"><h3 class="h-part"><span>7</span>تقييم إضافي<small dir="ltr">Assessment</small></h3>
+  {assess(L)}</div>
 
   <h3 class="h-part"><span>8</span>التعلّم الاجتماعي العاطفي: أنشطة<small dir="ltr">Social-Emotional Learning · SEL</small></h3>
   {sel(L)}

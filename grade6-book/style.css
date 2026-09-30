@@ -858,4 +858,6 @@ table.mini th { background: color-mix(in srgb, var(--c) 12%, var(--paper)); font
   .lquiz-sol .sol-h { grid-column: 1 / -1; margin: 0; }
   .assess .mcq { grid-template-columns: 1fr 1fr; }
   .open-q { padding-block: 8px; }
+  .keep-sk, .keep-sk .sk-model, .keep-sk .sk-p { break-inside: avoid; }
+  .sk-compact .sk-model > header .skb { width: 40px; height: 40px; }
 }
