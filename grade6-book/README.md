@@ -24,6 +24,10 @@ It has the same design as the grade-7 book (`../grade7-book`), with a burgundy c
   - an inner title page with a copyright notice, and a "how to use your book" page;
   - a journey map for tracking progress, and an end-of-lesson badge;
   - a certificate of excellence and a back cover.
+- A colourful cartoon scene (kids and everyday objects) in every lesson's «تمهيد» story (`cartoons.py`).
+- Compact print layout (about 209 pages):
+  - exercises, worked examples and exam solutions in two columns;
+  - one teaching activity, two SEL activities and two in-lesson MCQs per lesson (the rest are on the MCQ cards).
 - Skills Builder is compact: one solved problem in a 2×2 step grid and one practice problem.
 - Figures:
   - A drawn illustration for each lesson (`illustrations.py`).

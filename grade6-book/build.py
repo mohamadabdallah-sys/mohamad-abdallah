@@ -6,6 +6,7 @@ import verify
 from illustrations import FIGS
 from qfigs import render as qfig
 import extras
+import cartoons
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PAGES_FILE = os.path.join(HERE, "pages.json")
@@ -304,7 +305,8 @@ def exercises(L):
         items = []
         for ex in L.get(key, []):
             k += 1
-            wide = ex["text"] or L["id"] == "poly"
+            q = ex["q"]
+            wide = ex["text"] and ("[[fig:" in q or "<table" in q or len(q) > 120)
             body = f'<p>{ex["q"]}</p>' if ex["text"] else dm(ex["q"])
             kind = ex.get("kind") or ("مسألة" if ex["text"] else KIND[L["id"]])
             vary = " vary" if ex.get("kind") else ""
@@ -346,7 +348,7 @@ SEL_KIND = {"coop": ("users", "تعاون", "Cooperation"), "reflect": ("mirror"
 
 def sel(L):
     cards = []
-    for a in L["sel"]:
+    for a in L["sel"][:2]:
         ic, name, en = SEL_KIND[a["kind"]]
         scale = ('<div class="sel-scale"><span>أقلّ ثقة</span>' + "".join(f"<i>{k}</i>" for k in range(1, 6)) + '<span>واثق جدًّا</span></div>') if a["scale"] else ""
         lines = '<div class="sel-lines">' + "<i></i>" * a["lines"] + "</div>" if a["lines"] else ""
@@ -389,13 +391,13 @@ def quiz(L):
 
 def assess(L):
     items = []
-    for i, q in enumerate(L["mcq"]):
+    for i, q in enumerate(L["mcq"][:2]):
         opts = "".join(f'<li><i>{AR_LETTERS[j]}</i>{(o[5:] if o.startswith("html:") else m(o))}</li>' for j, o in enumerate(q["opts"]))
         items.append(f'<li class="mcq-q"><span class="q-n">{i + 1}</span><div><p>{hx(q["q"])}</p><ol class="mcq-o">{opts}</ol></div></li>')
     return f'''<div class="assess">
   <p class="instr">اختر الإجابة الصحيحة وضع دائرة حول حرفها:</p>
   <ol class="mcq">{"".join(items)}</ol>
-  <div class="open-q">{stk("🤔")}<span class="tag">سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i><i></i></div></div>
+  <div class="open-q">{stk("🤔")}<span class="tag">سؤال مفتوح</span><p>{L["open"]}</p><div class="sel-lines"><i></i><i></i></div></div>
 </div>'''
 
 
@@ -411,7 +413,7 @@ def intro(L):
     it = L["intro"]
     rec = "".join(f'<li><span class="q-n">{i + 1}</span><p>{q}</p><i></i></li>' for i, (q, _, _) in enumerate(it["recall"]))
     return f'''<div class="intro">
-  <article class="intro-hook"><span class="rs-k">موقف للتفكير</span><p>{it["hook"]}</p><div class="sel-lines"><i></i></div></article>
+  <article class="intro-hook"><span class="rs-k">موقف للتفكير</span><p>{it["hook"]}</p>{cartoons.scene(L["id"])}</article>
   <article class="intro-recall"><span class="rs-k">ماذا أعرف مسبقًا؟</span><ol>{rec}</ol></article>
   <p class="intro-idea"><b>فكرة الدرس:</b> {it["idea"]}</p>
 </div>'''
@@ -419,7 +421,7 @@ def intro(L):
 
 def activities(L):
     cards = []
-    for i, a in enumerate(L["activities"]):
+    for i, a in enumerate(L["activities"][:1]):
         aids = "".join(f"<li>{x}</li>" for x in a["aids"])
         steps = "".join(f"<li>{x}</li>" for x in a["steps"])
         cards.append(f'''<article class="act">
@@ -485,8 +487,8 @@ def _lesson(L):
   <h3 class="h-part"><span>0</span>تمهيد<small dir="ltr">Introduction</small></h3>
   {intro(L)}
 
-  <figure class="lesson-fig">{FIGS[L["fig"]][0]()}<figcaption>{FIGS[L["fig"]][1]}</figcaption></figure>
-  {extras.fact_box(L)}
+  <div class="fig-row"><figure class="lesson-fig">{FIGS[L["fig"]][0]()}<figcaption>{FIGS[L["fig"]][1]}</figcaption></figure>
+  {extras.fact_box(L)}</div>
 
   <h3 class="h-part"><span>0</span>الشرح</h3>
   <div class="prose">{L["explain"]}</div>
@@ -527,8 +529,6 @@ def _lesson(L):
   <h3 class="h-part"><span>9</span>سؤال بحث<small dir="ltr">Research</small></h3>
   {research(L)}
 
-  <aside class="self">{stk("👏")}<h4><span class="ico">{ICON["check"]}</span>قيّم نفسك قبل أن تنتقل إلى الدرس التالي</h4>
-    <table><thead><tr><th></th><th>أتقنتُ</th><th>أحتاج تمرينًا</th></tr></thead><tbody>{self_rows(L)}</tbody></table></aside>
 
   <h3 class="h-part quiz-part"><span>10</span>نموذج امتحان الدرس مع الحلّ</h3>
   {quiz(L)}
