@@ -37,6 +37,15 @@ It has the same design as the grade-7 book (`../grade7-book`), with a burgundy c
 
 Every answer (more than 1 000) is checked with sympy by `verify.py`, and the build fails if any answer is wrong.
 
+## Exercise book (كتاب التمارين)
+`python3 workbook.py` builds a separate exercises-only book:
+- `كتاب-التمارين-الصف-السادس.pdf`: 21 two-page worksheets, one per lesson, with space to write.
+  - Each worksheet has (أ) quick drills, (ب) varied exercises with figures and tables, and (ج) word problems.
+  - Every exercise is new: none repeats the textbook.
+- `حلول-كتاب-التمارين-الصف-السادس.pdf`: the answer key.
+
+The exercises come from templates with fixed seeds, and each answer is computed together with its question.
+
 ## Build
 ```
 python3 make_pdf.py   # verify → build → render → PDF (page numbers, index, frame, bookmarks)
