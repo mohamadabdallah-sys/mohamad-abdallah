@@ -8,6 +8,7 @@
 import html, os, re, sys, unicodedata
 from quran import Quran
 import ornaments as O
+from sources import canon
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P = lambda *a: os.path.join(HERE, *a)
@@ -67,6 +68,7 @@ report = []
 
 # ----------------------------------------------------------------------------- footnote text
 def clean_note(t):
+    t = re.sub("[\u064B-\u0652\u0670\u0640]", "", t)
     t = re.sub(r"\^\d+\^", "", t)
     t = t.replace("**", "").replace("_", "")
     t = re.sub(r"^\s*\(?\s*المصدر\s*[:：]\s*", "", t)
@@ -92,7 +94,9 @@ def clean_note(t):
     t = re.sub(r"^قول [^:]{3,40}:\s*\((.*)\)\.?$", r"\1", t)
     t = re.sub(r"ج (\d+)/ص", r"ج \1، ص", t)
     t = honorifics(quotes(t))
-    if not t.endswith((".", "»", ")")):
+    if not t.startswith("سورة"):
+        t = canon(t)
+    if not t.endswith((".", "»")):
         t += "."
     return t
 
@@ -320,8 +324,17 @@ def convert(ctx, t):
     return t
 
 
+TASHKEEL = re.compile("[\u064B-\u0652\u0670\u0640]")
+
+
+def plain_ar(t):
+    """one style for the whole book: no vowel marks outside the Qur'an"""
+    return TASHKEEL.sub("", t)
+
+
 def render_inline(ctx, t):
     """tokens -> html"""
+    t = plain_ar(t)
     t = t.translate(AR_DIGITS)
     t = html.escape(t, quote=False)
     t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
@@ -419,7 +432,7 @@ def chapter_html(ch, num, topic_no):
             if in_list:
                 pass
                 in_list = False
-            body.append('<h3>%s</h3>' % html.escape(s.strip(" :.").translate(AR_DIGITS)))
+            body.append('<h3>%s</h3>' % html.escape(plain_ar(s.strip(" :.")).translate(AR_DIGITS)))
             continue
         bullet = s.startswith("•")
         if bullet:
@@ -444,11 +457,11 @@ def chapter_html(ch, num, topic_no):
         elif t.startswith("«") and t.rstrip(".").endswith(("»", "")) and len(t) < 900:
             cls = ' class="quote-block"'
         body.append(('<div class="li">%s</div>' if bullet else "<p%s>%%s</p>" % cls) % render_inline(ctx, t))
-    title = html.escape(ch["title"].replace("...", "…"))
+    title = html.escape(plain_ar(ch["title"]).replace("...", "…"))
     cid = "ch%d" % num
     label = ""
     if ch["kind"] == "topic":
-        label = '<div class="ch-num">%s</div>' % str(topic_no).translate(AR_DIGITS)
+        label = ""
     cls = {"intro": "chapter intro", "dedication": "chapter dedication", "topic": "chapter"}[ch["kind"]]
     return ('<section class="%s" id="%s" data-title="%s"><div class="opener">%s<h2 class="ch-title">%s</h2>%s</div>\n%s\n</section>'
             % (cls, cid, title, label, title, ORN, "\n".join(body)))
