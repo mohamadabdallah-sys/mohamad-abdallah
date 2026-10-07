@@ -92,7 +92,7 @@ sup.fnr {
 .li.cont::before { content: none; }
 
 h3 {
-  font-family: "Amiri", serif; font-weight: 700; font-size: 13.4pt; line-height: 1.7;
+  font-family: "Amiri", serif; font-weight: 700; font-size: 12.8pt; line-height: 1.7;
   color: var(--deep); margin: 4mm 0 2mm; padding-right: 3.5mm;
   border-right: 2.4pt solid var(--gold);
 }
@@ -106,12 +106,15 @@ h3 {
 }
 .ch-title {
   font-family: "Aref Ruqaa", "Amiri", serif; font-weight: 700;
-  font-size: 23pt; line-height: 1.55; color: var(--deep);
+  font-size: 18pt; line-height: 1.55; color: var(--deep);
   margin: 5mm 6mm 0;
 }
 .orn { height: 9mm; margin: 2mm 0 6mm; }
 /* dedication */
-.ded { text-indent: 0; text-align: center; font-size: 13.2pt; line-height: 2.05; margin: 0 0 0.5mm; color: #2b2520; }
+.ded { text-indent: 0; text-align: center; font-size: 11.8pt; line-height: 1.66; margin: 0; color: #2b2520; }
+.dedication .opener { padding-top: 0; margin-bottom: 0; }
+.dedication .ch-title { margin-top: 0; }
+.dedication .orn { margin: 0 0 3mm; }
 .page .text p.ded.split { text-align-last: center; }
 
 /* ---------------------------------------------------------------- fixed front pages */
@@ -137,3 +140,13 @@ h3 {
 .toc-row .tp { color: var(--green); font-weight: 700; min-width: 8mm; text-align: left; }
 .toc-row.front .tt { color: var(--deep); font-weight: 700; }
 .toc-row.front .tn { font-family: "Amiri Quran", serif; font-weight: 400; }
+
+/* ---------------------------------------------------------------- sources */
+.bib { text-indent: -6mm; padding-right: 6mm; margin: 0 0 1.6mm; font-size: 11.6pt; line-height: 1.7; text-align: right; }
+.bib .bt { font-weight: 700; color: var(--deep); }
+
+/* a topic set slightly tighter so that its last page is not left with a line or two (paginate.js) */
+.page.tight1 .text { line-height: 1.8; }
+.page.tight1 .text p { margin-bottom: 1.8mm; }
+.page.tight2 .text { line-height: 1.74; }
+.page.tight2 .text p { margin-bottom: 1.2mm; }

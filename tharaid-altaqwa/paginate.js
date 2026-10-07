@@ -7,13 +7,15 @@
 // of contents. window.__done = true when finished.
 (function () {
   const AR = s => String(s).replace(/[0-9]/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
-  const MIN_WORDS = 5;          // never leave fewer words than this on either side of a split
+  // no lone line at the foot of a page (orphan) or at the head of the next one (widow):
+  // a split leaves at least HEAD_WORDS before it and TAIL_WORDS (two lines or so) after it
+  const HEAD_WORDS = 12, TAIL_WORDS = 18;
 
   let book, pages = [], cur = null, curTopic = "", chapterStarts = [];
 
   function newPage(opts = {}) {
     const page = document.createElement("div");
-    page.className = "page" + (opts.cls ? " " + opts.cls : "");
+    page.className = "page" + (opts.cls ? " " + opts.cls : "") + (pageCls && !opts.cls ? " " + pageCls : "");
     page.innerHTML =
       '<div class="head"></div><div class="body"><div class="text"></div>' +
       '<div class="notes"></div></div><div class="foot"></div>';
@@ -134,7 +136,7 @@
       unplace(cur, r);
       // break points: after atoms that end with a space
       const breaks = [];
-      for (let i = a + MIN_WORDS; i <= atoms.length - MIN_WORDS; i++) if (atoms[i - 1].space) breaks.push(i);
+      for (let i = a + HEAD_WORDS; i <= atoms.length - TAIL_WORDS; i++) if (atoms[i - 1].space) breaks.push(i);
       let lo = 0, hi = breaks.length - 1, best = -1;
       while (lo <= hi) {
         const mid = (lo + hi) >> 1;
@@ -171,7 +173,22 @@
     return c;
   }
 
-  function flowSection(sec) {
+  // a topic whose last page would hold only a line or two is set again slightly tighter
+  function flowSectionFitted(sec) {
+    const start = pages.length, starts = chapterStarts.length;
+    for (let level = 0; level <= 2; level++) {
+      flowSection(sec, level ? "tight" + level : "");
+      const last = pages[pages.length - 1];
+      const used = (last.text.offsetHeight + (last.notes.childElementCount ? last.notes.offsetHeight : 0)) / last.body.clientHeight;
+      if (pages.length - start < 2 || used > 0.16 || level === 2) return;
+      pages.splice(start).forEach(p => p.el.remove());
+      chapterStarts.length = starts;
+    }
+  }
+
+  let pageCls = "";
+  function flowSection(sec, tight) {
+    pageCls = tight || "";
     const title = sec.getAttribute("data-title");
     curTopic = title;
     const p = newPage({ opener: true });
@@ -243,11 +260,32 @@
     const src = document.getElementById("src");
     for (const sec of Array.from(src.children)) {
       if (sec.classList.contains("title-page") || sec.classList.contains("basmala-page")) fixedPage(sec);
-      else flowSection(sec);
+      else flowSectionFitted(sec);
     }
+    pageCls = "";
     toc();
     decorate();
     src.remove();
+    // pre-print audit: how full each page is, headings stranded at a page foot, lone lines
+    window.__audit = pages.map((p, i) => {
+      if (p.plain) return null;
+      const kids = Array.from(p.text.children);
+      const last = kids[kids.length - 1];
+      const lh = parseFloat(getComputedStyle(p.text).lineHeight) || 20;
+      const lastLines = last ? Math.round(last.offsetHeight / (parseFloat(getComputedStyle(last).lineHeight) || lh)) : 0;
+      const first = kids[0];
+      return {
+        page: i + 1, topic: p.topic, opener: p.opener,
+        fill: +((p.text.offsetHeight + (p.notes.isConnected ? p.notes.offsetHeight : 0)) / p.body.clientHeight).toFixed(2),
+        notes: p.notes.isConnected ? p.notes.childElementCount : 0,
+        endsWithHeading: !!last && last.tagName === "H3",
+        lastIsSplit: !!last && last.classList.contains("split"),
+        firstIsCont: !!first && first.classList.contains("cont"),
+        firstLines: first ? Math.round(first.offsetHeight / (parseFloat(getComputedStyle(first).lineHeight) || lh)) : 0,
+        lastLines,
+        blocks: kids.length,
+      };
+    }).filter(Boolean);
     window.__pages = pages.length;
     window.__overflow = pages.map((p, i) => (!p.plain && !fits(p)) ? i + 1 : 0).filter(Boolean);
     window.__chapters = chapterStarts.concat([{ title: "الفهرس", page: tocPage }]);

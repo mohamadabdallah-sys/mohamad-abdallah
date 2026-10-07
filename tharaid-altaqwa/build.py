@@ -15,6 +15,8 @@ P = lambda *a: os.path.join(HERE, *a)
 
 TITLE = "ثرائد التقوى"
 AUTHOR = "محمد عبدالله"
+# the final, proofread and vocalised text (made from build/edited.txt); falls back to prep.py's output
+TEXT = P("src", "text.txt") if os.path.exists(P("src", "text.txt")) else P("build", "edited.txt")
 
 SURA_FIX = {14: "إبراهيم", 34: "سبأ", 76: "الإنسان", 78: "النبأ", 82: "الانفطار", 84: "الانشقاق"}
 
@@ -325,11 +327,14 @@ def convert(ctx, t):
 
 
 TASHKEEL = re.compile("[\u064B-\u0652\u0670\u0640]")
+VOWELS = re.compile("[\u064E-\u0650\u0652\u0670\u0640]")      # fatha, damma, kasra, sukun, dagger alif, tatweel
 
 
 def plain_ar(t):
-    """one style for the whole book: no vowel marks outside the Qur'an"""
-    return TASHKEEL.sub("", t)
+    """one style for the whole book outside the Qur'an: shadda and tanween only"""
+    t = VOWELS.sub("", t)
+    t = re.sub("\u064B(\u0651?)\u0627", "\\1\u0627\u064B", t)       # fathatan on the alif: كتاباً
+    return t
 
 
 def render_inline(ctx, t):
@@ -358,7 +363,7 @@ def is_heading(p):
 
 
 def parse():
-    paras = [l for l in open(P("build", "edited.txt"), encoding="utf8").read().split("\n") if l.strip()]
+    paras = [l for l in open(TEXT, encoding="utf8").read().split("\n") if l.strip()]
     i = paras.index("**المقدمة**")
     intro_end = paras.index("**الإهداء**")
     chapters = [{"title": "المقدمة", "paras": paras[i + 1:intro_end], "kind": "intro"}]
@@ -467,6 +472,78 @@ def chapter_html(ch, num, topic_no):
             % (cls, cid, title, label, title, ORN, "\n".join(body)))
 
 
+# ----------------------------------------------------------------------------- sources page
+# every book cited in the footnotes, with its author (القرآن الكريم first, the rest alphabetically)
+BIBLIOGRAPHY = [
+    ("الاثنا عشرية في المواعظ العددية", "محمد بن الحسن الحرّ العاملي"),
+    ("الإرشاد في معرفة حجج الله على العباد", "الشيخ المفيد، محمد بن محمد بن النعمان"),
+    ("إقبال الأعمال", "السيد علي بن موسى بن طاووس"),
+    ("الأمالي", "الشيخ الصدوق، محمد بن علي بن بابويه القمّي"),
+    ("الأمالي", "الشيخ الطوسي، محمد بن الحسن"),
+    ("بحار الأنوار الجامعة لدرر أخبار الأئمّة الأطهار", "العلّامة محمد باقر المجلسي"),
+    ("البرهان في تفسير القرآن", "السيد هاشم البحراني"),
+    ("بصائر الدرجات", "محمد بن الحسن الصفّار"),
+    ("تحف العقول عن آل الرسول", "ابن شعبة الحرّاني"),
+    ("تصحيح اعتقادات الإمامية", "الشيخ المفيد"),
+    ("التفسير المنسوب إلى الإمام الحسن العسكري (عليه السلام)", ""),
+    ("تفسير العيّاشي", "محمد بن مسعود العيّاشي"),
+    ("تفسير القمّي", "علي بن إبراهيم القمّي"),
+    ("تفسير نور الثقلين", "الشيخ عبد علي العروسي الحويزي"),
+    ("التوحيد", "الشيخ الصدوق"),
+    ("تهذيب الأحكام", "الشيخ الطوسي"),
+    ("ثواب الأعمال وعقاب الأعمال", "الشيخ الصدوق"),
+    ("جامع الأخبار", "محمد بن محمد الشعيري"),
+    ("جامع السعادات", "الشيخ محمد مهدي النراقي"),
+    ("الخصال", "الشيخ الصدوق"),
+    ("روضة الواعظين", "محمد بن الفتّال النيسابوري"),
+    ("سنن ابن ماجه", "محمد بن يزيد بن ماجه القزويني"),
+    ("سنن الترمذي", "محمد بن عيسى الترمذي"),
+    ("السنن الكبرى", "أحمد بن الحسين البيهقي"),
+    ("شرح نهج البلاغة", "ابن أبي الحديد المعتزلي"),
+    ("الصحيفة السجّادية", "الإمام علي بن الحسين زين العابدين (عليه السلام)"),
+    ("علل الشرائع", "الشيخ الصدوق"),
+    ("عوالي اللآلي العزيزية في الأحاديث الدينية", "ابن أبي جمهور الأحسائي"),
+    ("عيون أخبار الرضا (عليه السلام)", "الشيخ الصدوق"),
+    ("عيون الحكم والمواعظ", "علي بن محمد الليثي الواسطي"),
+    ("غرر الحكم ودرر الكلم", "عبد الواحد بن محمد التميمي الآمدي"),
+    ("الكافي", "ثقة الإسلام محمد بن يعقوب الكليني"),
+    ("كشف الغمّة في معرفة الأئمّة", "علي بن عيسى الإربلي"),
+    ("كمال الدين وتمام النعمة", "الشيخ الصدوق"),
+    ("كنز العمّال في سنن الأقوال والأفعال", "علي المتّقي الهندي"),
+    ("الكنى والألقاب", "الشيخ عبّاس القمّي"),
+    ("مجمع البيان في تفسير القرآن", "الشيخ الفضل بن الحسن الطبرسي"),
+    ("المحاسن", "أحمد بن محمد بن خالد البرقي"),
+    ("مختصر بصائر الدرجات", "الحسن بن سليمان الحلّي"),
+    ("مستدرك الوسائل ومستنبط المسائل", "الميرزا حسين النوري الطبرسي"),
+    ("مسند أحمد", "أحمد بن حنبل"),
+    ("مشكاة الأنوار في غرر الأخبار", "علي بن الحسن الطبرسي"),
+    ("مصباح الشريعة", "المنسوب إلى الإمام جعفر الصادق (عليه السلام)"),
+    ("مصباح المتهجّد", "الشيخ الطوسي"),
+    ("معاني الأخبار", "الشيخ الصدوق"),
+    ("مكارم الأخلاق", "الحسن بن الفضل الطبرسي"),
+    ("من لا يحضره الفقيه", "الشيخ الصدوق"),
+    ("مناقب آل أبي طالب", "ابن شهرآشوب المازندراني"),
+    ("ميزان الحكمة", "محمد الريشهري"),
+    ("نهج البلاغة", "جمع الشريف الرضي"),
+    ("وسائل الشيعة إلى تحصيل مسائل الشريعة", "محمد بن الحسن الحرّ العاملي"),
+]
+
+
+def bib_key(entry):
+    t = re.sub(r"^ال", "", TASHKEEL.sub("", entry[0]))
+    return t.translate(str.maketrans("أإآ", "ااا")), entry[1]
+
+
+def bibliography_html():
+    rows = ['<p class="bib"><span class="bt">القرآن الكريم.</span></p>']
+    for title, author in sorted(BIBLIOGRAPHY, key=bib_key):
+        title, author = TASHKEEL.sub("", title), TASHKEEL.sub("", author)      # plain, like the footnotes
+        rows.append('<p class="bib"><span class="bt">%s</span>%s.</p>' % (
+            html.escape(title), ("، " + html.escape(author)) if author else ""))
+    return ('<section class="chapter biblio" id="biblio" data-title="المصادر والمراجع"><div class="opener">'
+            '<h2 class="ch-title">المصادر والمراجع</h2>%s</div>\n%s\n</section>' % (ORN, "\n".join(rows)))
+
+
 def front_matter():
     return """
 <section class="title-page">
@@ -481,9 +558,9 @@ def front_matter():
 <section class="basmala-page">
   <div class="basmala">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
   <div class="hamd">
-    <p>الحمدُ للهِ ربِّ العالمين</p>
-    <p>والصلاةُ والسلامُ على المبعوثِ رحمةً للعالمين</p>
-    <p>محمدٍ وآلهِ الطيبين الطاهرين</p>
+    <p>الحمد لله ربّ العالمين</p>
+    <p>والصّلاة والسّلام على المبعوث رحمةً للعالمين</p>
+    <p>محمّدٍ وآله الطّيّبين الطّاهرين</p>
   </div>
 </section>
 """ % (TITLE, AUTHOR)
@@ -503,6 +580,7 @@ def main():
     for k, ch in enumerate(chapters):
         n += ch["kind"] == "topic"
         parts.append(chapter_html(ch, k, n))
+    parts.append(bibliography_html())
     parts.append(toc_html(chapters))
     tpl = open(P("book.css"), encoding="utf8").read()
     tpl += ".orn { background: url(%s) center / 62mm auto no-repeat; }\n" % O.data_uri(O.divider())

@@ -19,6 +19,8 @@ try { pw = require("playwright"); } catch { pw = require("/opt/node22/lib/node_m
     if (ov.length) console.log("WARNING overflowing pages:", ov.join(", "));
     const ch = await page.evaluate(() => JSON.stringify(window.__chapters || []));
     require("fs").writeFileSync(path.resolve(path.dirname(out), "chapters.json"), ch);
+    const audit = await page.evaluate(() => JSON.stringify(window.__audit || []));
+    require("fs").writeFileSync(path.resolve(path.dirname(out), "audit.json"), audit);
   } else {
     await page.evaluate(() => document.fonts.ready);
   }
