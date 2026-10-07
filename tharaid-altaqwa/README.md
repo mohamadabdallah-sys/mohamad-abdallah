@@ -25,4 +25,4 @@ Needs Python 3 with `pymupdf`, and Node with Playwright (Chromium).
 3. `paginate.js` lays the book out in Chromium (pages, per-page footnotes, table of contents), `render.js` prints it
 4. `cover.py` draws the covers; `make_pdf.py` joins everything and adds bookmarks
 
-Fonts (in `fonts/`): Amiri, Amiri Quran, Aref Ruqaa (SIL Open Font License).
+Fonts (in `fonts/`): Amiri, Amiri Quran, Aref Ruqaa; cover: Reem Kufi, IBM Plex Sans Arabic (SIL Open Font License).
