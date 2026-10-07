@@ -1,0 +1,139 @@
+/* ثرائد التقوى — book typography (pages are built by paginate.js) */
+@font-face { font-family: "Amiri"; font-weight: 400; src: url(../fonts/amiri-arabic-400-normal.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: "Amiri"; font-weight: 400; src: url(../fonts/amiri-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2212; }
+@font-face { font-family: "Amiri"; font-weight: 700; src: url(../fonts/amiri-arabic-700-normal.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: "Amiri"; font-weight: 700; src: url(../fonts/amiri-latin-700-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F, U+20AC, U+2122, U+2212; }
+@font-face { font-family: "Amiri Quran"; src: url(../fonts/amiri-quran-arabic-400-normal.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: "Amiri Quran"; src: url(../fonts/amiri-quran-latin-400-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: "Aref Ruqaa"; font-weight: 400; src: url(../fonts/aref-ruqaa-arabic-400-normal.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: "Aref Ruqaa"; font-weight: 700; src: url(../fonts/aref-ruqaa-arabic-700-normal.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFF; }
+
+:root {
+  --ink: #1d1a16;
+  --green: #0d5a42;
+  --deep: #0a3b2e;
+  --gold: #a9812f;
+  --gold-soft: #dcc898;
+  --maroon: #6b2a1b;
+}
+
+@page { size: 170mm 240mm; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+html { direction: rtl; }
+body {
+  font-family: "Amiri", serif;
+  font-size: 12.4pt;
+  line-height: 1.88;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+#src { display: none; }
+
+/* ---------------------------------------------------------------- the page box */
+.page {
+  position: relative;
+  width: 170mm; height: 240mm;
+  overflow: hidden;
+  break-after: page;
+  background: #fff;
+}
+.page .head {
+  position: absolute; top: 11mm; left: 19mm; right: 19mm; height: 8mm;
+  text-align: center; font-size: 9.2pt; line-height: 8mm; color: var(--green);
+  border-bottom: 0.5pt solid var(--gold-soft);
+}
+.page .head:empty { border: 0; }
+.page .body {
+  position: absolute; top: 23mm; bottom: 24mm; left: 19mm; right: 19mm;
+  display: flex; flex-direction: column;
+}
+.page .text { display: flow-root; text-align: justify; }
+.page .notes {
+  margin-top: auto; padding-top: 2mm;
+  border-top: 0.6pt solid var(--gold);
+  font-size: 9.3pt; line-height: 1.55; color: #3b342c;
+}
+.page .notes:empty { display: none; }
+.fnote { text-align: right; }
+.fnn { color: var(--green); font-weight: 700; margin-left: 1mm; }
+.page .foot {
+  position: absolute; bottom: 10mm; left: 0; right: 0; text-align: center; height: 9mm;
+}
+.pn {
+  display: inline-block; min-width: 9mm; padding: 0 3mm;
+  font-size: 11pt; line-height: 8mm; color: var(--deep);
+  border-top: 0.6pt solid var(--gold); border-bottom: 0.6pt solid var(--gold);
+}
+.pn::before, .pn::after { content: "۞"; font-family: "Amiri Quran", serif; color: var(--gold); font-size: 7pt; padding: 0 1.5mm; vertical-align: middle; }
+
+/* ---------------------------------------------------------------- text */
+p { margin: 0 0 2.4mm; text-indent: 6mm; }
+p.cont { text-indent: 0; }
+p.split, .li.split { text-align-last: justify; }
+b { color: var(--deep); }
+sup.fnr {
+  font-size: 7.4pt; line-height: 0; color: var(--gold); font-weight: 700;
+  vertical-align: super; padding: 0 0.3mm;
+}
+
+.ayah {
+  font-family: "Amiri Quran", "Amiri", serif;
+  color: var(--green);
+  font-size: 12.8pt;
+}
+.verse-block { text-align: center; text-indent: 0; margin: 2.5mm 3mm 3mm; }
+.verse-block .ayah { font-size: 13.8pt; }
+.page .text .verse-block.split { text-align-last: center; }
+.q { color: var(--maroon); }
+.quote-block { text-indent: 0; padding: 0 5mm; }
+
+.li { position: relative; padding-right: 6mm; margin: 0 0 1.8mm; }
+.li::before { content: "۞"; font-family: "Amiri Quran", serif; position: absolute; right: 0; top: 0; color: var(--gold); font-size: 9pt; }
+.li.cont::before { content: none; }
+
+h3 {
+  font-family: "Amiri", serif; font-weight: 700; font-size: 13.4pt; line-height: 1.7;
+  color: var(--deep); margin: 4mm 0 2mm; padding-right: 3.5mm;
+  border-right: 2.4pt solid var(--gold);
+}
+
+/* ---------------------------------------------------------------- topic opener */
+.opener { text-align: center; padding-top: 6mm; margin-bottom: 2mm; }
+.ch-num {
+  width: 100%; height: 18mm; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13pt; color: #fffdf6; line-height: 1;
+}
+.ch-title {
+  font-family: "Aref Ruqaa", "Amiri", serif; font-weight: 700;
+  font-size: 23pt; line-height: 1.55; color: var(--deep);
+  margin: 5mm 6mm 0;
+}
+.orn { height: 9mm; margin: 2mm 0 6mm; }
+/* dedication */
+.ded { text-indent: 0; text-align: center; font-size: 13.2pt; line-height: 2.05; margin: 0 0 0.5mm; color: #2b2520; }
+.page .text p.ded.split { text-align-last: center; }
+
+/* ---------------------------------------------------------------- fixed front pages */
+.page.fixed .body { top: 18mm; bottom: 18mm; display: flex; align-items: center; justify-content: center; }
+.title-page, .basmala-page { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.tp-frame {
+  width: 104mm; padding: 30mm 8mm; text-align: center;
+  border: 1.3pt solid var(--gold); outline: 0.5pt solid var(--gold); outline-offset: 2.2mm;
+}
+.tp-orn { font-family: "Amiri Quran", serif; font-size: 26pt; color: var(--gold); line-height: 1.4; }
+.tp-title { font-family: "Aref Ruqaa", serif; font-weight: 700; font-size: 46pt; color: var(--deep); margin: 6mm 0 2mm; line-height: 1.35; }
+.tp-line { width: 42mm; margin: 7mm auto; border-top: 0.8pt solid var(--gold); }
+.tp-author-label { font-size: 11pt; color: #6b5f50; }
+.tp-author { font-family: "Aref Ruqaa", serif; font-size: 24pt; color: var(--green); line-height: 1.6; }
+.basmala { font-family: "Amiri Quran", serif; font-size: 29pt; color: var(--deep); margin-bottom: 14mm; line-height: 2; }
+.hamd p { text-indent: 0; text-align: center; font-size: 15pt; line-height: 2.2; margin: 0; color: #3a332b; }
+
+/* ---------------------------------------------------------------- table of contents */
+.toc-row { display: flex; align-items: baseline; font-size: 11.8pt; line-height: 1.75; }
+.toc-row .tn { color: var(--gold); font-weight: 700; min-width: 9mm; }
+.toc-row .tt { flex: 0 1 auto; }
+.toc-row .fill { flex: 1 1 auto; border-bottom: 1pt dotted #bcae90; margin: 0 2mm; transform: translateY(-1.3mm); }
+.toc-row .tp { color: var(--green); font-weight: 700; min-width: 8mm; text-align: left; }
+.toc-row.front .tt { color: var(--deep); font-weight: 700; }
+.toc-row.front .tn { font-family: "Amiri Quran", serif; font-weight: 400; }
