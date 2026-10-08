@@ -15,7 +15,7 @@
 
   function newPage(opts = {}) {
     const page = document.createElement("div");
-    page.className = "page" + (opts.cls ? " " + opts.cls : "") + (pageCls && !opts.cls ? " " + pageCls : "");
+    page.className = "page" + (opts.opener ? " opener-page" : "") + (opts.cls ? " " + opts.cls : "") + (pageCls && !opts.cls ? " " + pageCls : "");
     page.innerHTML =
       '<div class="head"></div><div class="body"><div class="text"></div>' +
       '<div class="notes"></div></div><div class="foot"></div>';

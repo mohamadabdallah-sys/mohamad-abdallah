@@ -79,10 +79,10 @@ sup.fnr {
 .ayah {
   font-family: "Amiri Quran", "Amiri", serif;
   color: #111;
-  font-size: 12.8pt;
+  font-size: 11.1pt;
 }
 .verse-block { text-align: center; text-indent: 0; margin: 2.5mm 3mm 3mm; }
-.verse-block .ayah { font-size: 13.8pt; }
+.verse-block .ayah { font-size: 12pt; }
 .page .text .verse-block.split { text-align-last: center; }
 .q { color: #111; }
 .quote-block { text-indent: 0; padding: 0 5mm; }
@@ -153,3 +153,9 @@ h3 {
 
 .hamd-end { text-indent: 0; text-align: center; margin: 5mm 0 0; font-weight: 700; color: var(--deep); }
 .page .text p.hamd-end.split { text-align-last: center; }
+
+/* topic opener pages: the title sits high on the page (no empty running head above it) */
+.page.opener-page .body { top: 13mm; }
+.opener { padding-top: 0; margin-bottom: 0; }
+.ch-title { margin: 0 6mm 0; }
+.orn { height: 8mm; margin: 0 0 3mm; }
