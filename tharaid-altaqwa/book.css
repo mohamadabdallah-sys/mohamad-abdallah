@@ -150,3 +150,6 @@ h3 {
 .page.tight1 .text p { margin-bottom: 1.8mm; }
 .page.tight2 .text { line-height: 1.74; }
 .page.tight2 .text p { margin-bottom: 1.2mm; }
+
+.hamd-end { text-indent: 0; text-align: center; margin: 5mm 0 0; font-weight: 700; color: var(--deep); }
+.page .text p.hamd-end.split { text-align-last: center; }

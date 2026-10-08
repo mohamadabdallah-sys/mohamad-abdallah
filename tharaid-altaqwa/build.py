@@ -219,7 +219,7 @@ def spacing(t):
     t = re.sub(r"[ \t]+", " ", t)
     t = re.sub(r"\s+([،؛:.!؟?…»\)\]])", r"\1", t)
     t = re.sub(r"([«\(\[])\s+", r"\1", t)
-    t = re.sub(r"([،؛:!؟])(?=[^\s\d؀-ؠ»\)\]-…])", r"\1 ", t)
+    t = re.sub(r"([،؛:!؟])(?=[^!؟\s\d؀-ؠ»\)\]-…])", r"\1 ", t)
     t = re.sub(r"\.(?=[ء-ي])", ". ", t)
     t = re.sub(r"؛\s*؛", "؛", t)
     t = re.sub(r"\.{2,}", ".", t)
@@ -334,6 +334,7 @@ def plain_ar(t):
     """one style for the whole book outside the Qur'an: shadda and tanween only"""
     t = VOWELS.sub("", t)
     t = re.sub("\u064B(\u0651?)\u0627", "\\1\u0627\u064B", t)       # fathatan on the alif: كتاباً
+    t = re.sub("(?<![\u0621-\u064A])([وفبكتل]?)(ال|ل)\u0644\u0651(?=\u0647)", "\\1\\2\u0644", t)   # الله, لله, بالله: no shadda
     return t
 
 
@@ -362,19 +363,27 @@ def is_heading(p):
     return s.startswith("**") and s.endswith("**") and len(plain(s)) < 70 and "**" not in s[2:-2]
 
 
+def K(s):
+    """structural key: the text without any vowel marks or shadda (the headings are vowelled in the final text)"""
+    return re.sub("[\u064B-\u0652\u0670\u0640]", "", s)
+
+
+SUBHEADS_K = tuple(K(x) for x in SUBHEADS)
+
+
 def parse():
     paras = [l for l in open(TEXT, encoding="utf8").read().split("\n") if l.strip()]
-    i = paras.index("**المقدمة**")
-    intro_end = paras.index("**الإهداء**")
+    i = [K(p) for p in paras].index("**المقدمة**")
+    intro_end = [K(p) for p in paras].index("**الإهداء**")
     chapters = [{"title": "المقدمة", "paras": paras[i + 1:intro_end], "kind": "intro"}]
     cur = {"title": "الإهداء", "paras": [], "kind": "dedication"}
     chapters.append(cur)
     for p in paras[intro_end + 1:]:
         s = plain(p)
-        if is_heading(p) and not s.startswith(SUBHEADS) and not re.match(r"^\[\d+\]", s):
+        if is_heading(p) and not K(s).startswith(SUBHEADS_K) and not re.match(r"^\[\d+\]", s):
             cur = {"title": s, "paras": [], "kind": "topic"}
             chapters.append(cur)
-        elif cur["kind"] == "dedication" and s == "اللطف الإلهي":
+        elif cur["kind"] == "dedication" and K(s) == "اللطف الإلهي":
             cur = {"title": s, "paras": [], "kind": "topic"}
             chapters.append(cur)
         else:
@@ -382,10 +391,11 @@ def parse():
     # «اللطف الإلهي» is a plain-text title inside the first topic
     out = []
     for ch in chapters:
-        if ch["kind"] == "topic" and "اللطف الإلهي" in ch["paras"]:
-            k = ch["paras"].index("اللطف الإلهي")
+        keys = [K(p) for p in ch["paras"]]
+        if ch["kind"] == "topic" and "اللطف الإلهي" in keys:
+            k = keys.index("اللطف الإلهي")
             out.append({"title": ch["title"], "paras": ch["paras"][:k], "kind": "topic"})
-            out.append({"title": "اللطف الإلهي", "paras": ch["paras"][k + 1:], "kind": "topic"})
+            out.append({"title": ch["paras"][k], "paras": ch["paras"][k + 1:], "kind": "topic"})
         else:
             out.append(ch)
     return out
@@ -403,9 +413,9 @@ def take_sources(ch, ctx):
             src = re.search(r"\(\s*المصدر\s*:\s*((?:[^()]|\([^()]*\))*)\)", item)
             ctx.srclist[int(m.group(1))] = src.group(1) if src else item
             continue
-        if s in ("الأحاديث والآثار:", "الهوامش والمصادر:"):
+        if K(s) in ("الأحاديث والآثار:", "الهوامش والمصادر:"):
             continue
-        if ch["title"].startswith("سكرات الموت") and s.startswith("•"):
+        if K(ch["title"]).startswith("سكرات الموت") and s.startswith("•"):
             bullets.append(s)
             continue
         keep.append(p)
@@ -415,7 +425,7 @@ def take_sources(ch, ctx):
             b = re.sub(r"\*\*[^*]*\*\*|^•\s*|^\.\s*", "", b).strip(" .")
             b = b.replace("الآيات 27-", "الآيتان 27–28")
             ctx.srclist[k] = b
-    if ch["title"] == "أبكي لظلمة قبري":
+    if K(ch["title"]) == "أبكي لظلمة قبري":
         ctx.srclist.update(GRAVE_SOURCES)
     ch["paras"] = keep
 
@@ -433,7 +443,7 @@ def chapter_html(ch, num, topic_no):
         if ch["kind"] == "dedication":
             body.append('<p class="ded">%s</p>' % render_inline(ctx, convert(ctx, p)))
             continue
-        if is_heading(p) or s.startswith(SUBHEADS) and len(s) < 60:
+        if is_heading(p) or K(s).startswith(SUBHEADS_K) and len(s) < 60:
             if in_list:
                 pass
                 in_list = False
@@ -462,6 +472,12 @@ def chapter_html(ch, num, topic_no):
         elif t.startswith("«") and t.rstrip(".").endswith(("»", "")) and len(t) < 900:
             cls = ' class="quote-block"'
         body.append(('<div class="li">%s</div>' if bullet else "<p%s>%%s</p>" % cls) % render_inline(ctx, t))
+    # every topic ends with the closing doxology
+    if ch["kind"] == "topic":
+        tail = re.sub(r"<[^>]*>", "", "".join(body[-2:]))
+        tail = TASHKEEL.sub("", tail).replace("\u0651", "")
+        if not re.search(r"الحمد\s+لله\s+رب\s+العالمين\s*[.!]?\s*$", tail.strip()):
+            body.append('<p class="hamd-end">والحمد لله ربّ العالمين.</p>')
     title = html.escape(plain_ar(ch["title"]).replace("...", "…"))
     cid = "ch%d" % num
     label = ""
