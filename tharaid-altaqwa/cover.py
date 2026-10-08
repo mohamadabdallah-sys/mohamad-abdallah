@@ -7,23 +7,25 @@ import os, re, math, random
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 BACK_TEXT = [
-    "أنا حُلمُ النِّيامِ، وخديعةُ الأيامِ، مَنِ استغنى فيَّ فُتِن، ومَنِ افتقرَ إليَّ حَزِن. "
-    "فاحذرني؛ فإنَّ بقاءَك فيَّ كفَيْءِ السحابِ أو وَميضِ السَّراب. "
-    "لو كنتُ وفيَّةً لَما خلَّفتُ مَقعدَ حبيبِ ربِّ العالمين، النبيِّ الأكرمِ؛ "
-    "ولو كنتُ نافعةً لَما نصبتُ الشِّراكَ للغافلين. "
-    "أنا التي طويتُ القرونَ في جَوفي، وأذقتُ الجبابرةَ كأساً من خَوْفي، "
-    "لا رَضِيعي سَلِم، ولا مُعمَّري غَنِم.",
-    "فيا مَن مَلَّكهُ الأملُ وطولُ المُهلة: بادِرِ العملَ قبل خُفوتِ القبسِ وحلولِ الوَهلة؛ "
-    "فما الأيامُ إلا مَراحلُ تُطوى إلى القُبور، وما الفوزُ إلا لمَن خَافَ العُبور، "
-    "يومَ يَنكشفُ المستورُ، ويُحصَّلُ ما في الصُّدور.",
+    "أنا حلم النّيام، وخديعة الأيّام، من استغنى فيّ فتن، ومن افتقر إليّ حزن. "
+    "فاحذرني؛ فإنّ بقاءك فيّ كفيء السّحاب أو وميض السّراب. "
+    "لو كنت وفيّةً لمّا خلّفت مقعد حبيب ربّ العالمين، النبيّ الأكرم؛ "
+    "ولو كنت نافعةً لمّا نصبت الشّراك للغافلين. "
+    "أنا التي طويت القرون في جوفي، وأذقت الجبابرة كأساً من خوفي، "
+    "لا رضيعي سلم، ولا معمّري غنم.",
+    "فيا من ملّكه الأمل وطول المهلة: بادر العمل قبل خفوت القبس وحلول الوهلة؛ "
+    "فما الأيّام إلّا مراحل تطوى إلى القبور، وما الفوز إلّا لمن خاف العبور، "
+    "يوم ينكشف المستور، ويحصّل ما في الصّدور.",
 ]
+TITLE_HTML = ("ثرائد", "التّقوى")
+AUTHOR = "محمّد عبدالله"
 
 VW, VH = 680, 960            # 4 units per mm
 
 
 def plain(s):
-    """no tashkeel anywhere on the cover"""
-    return re.sub("[\u064B-\u0652\u0670]", "", s)
+    """the cover uses the book's vocalisation: shadda and tanween only"""
+    return re.sub("[\u064E-\u0650\u0652\u0670\u0640]", "", s)
 
 
 def ridge(y0, amp, seed, n=9, bottom=VH + 10, shift=0.0):
@@ -142,30 +144,31 @@ def spiral(cx, cy, n, spread, rnd, inner, R, big, back=False):
 
 def flat(u, back=False):
     rnd = random.Random(5)
+    dark = not back
     b = ["""<defs>
-  <radialGradient id="bg{u}" cx="0.5" cy="0.38" r="0.85"><stop offset="0" stop-color="{c0}"/><stop offset="1" stop-color="{c1}"/></radialGradient>
-  <radialGradient id="bowl{u}" cx="0.5" cy="0.45" r="0.62"><stop offset="0" stop-color="#27bfb7"/><stop offset="0.75" stop-color="#14a09b"/><stop offset="1" stop-color="#0d7f85"/></radialGradient>
+  <radialGradient id="bg{u}" cx="0.5" cy="0.42" r="0.9"><stop offset="0" stop-color="{c0}"/><stop offset="1" stop-color="{c1}"/></radialGradient>
+  <radialGradient id="bowl{u}" cx="0.5" cy="0.45" r="0.62"><stop offset="0" stop-color="#2fcbc2"/><stop offset="0.75" stop-color="#17a8a2"/><stop offset="1" stop-color="#0e8a8f"/></radialGradient>
   <filter id="grain{u}" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="9"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0.55 -0.12"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 {gn}  0 0 0 0 {gn}  0 0 0 0 {gn}  0 0 0 0.55 -0.12"/>
   </filter>
-</defs>""".format(u=u, c0="#13777b" if back else "#f3ead7", c1="#084a50" if back else "#d9ccb0"),
+</defs>""".format(u=u, c0="#0f7377" if dark else "#f3ead7", c1="#06393f" if dark else "#d9ccb0", gn="0.9" if dark else "0.2"),
          '<rect width="%d" height="%d" fill="url(#bg%s)"/>' % (VW, VH, u)]
-    if back:
-        cx, cy, R = 650, 985, 215
+    if dark:
+        cx, cy, R = 340, 628, 196
     else:
-        cx, cy, R = 340, 628, 200
-    b.append('<circle cx="%d" cy="%d" r="%d" fill="#06292e" opacity="0.2"/>' % (cx + 9, cy + 13, R + 14))
-    b.append('<circle cx="%d" cy="%d" r="%d" fill="%s"/>' % (cx, cy, R + 14, SAND if not back else "#0a4c52"))
+        cx, cy, R = 650, 985, 215
+    b.append('<circle cx="%d" cy="%d" r="%d" fill="#03242a" opacity="0.35"/>' % (cx + 9, cy + 13, R + 14))
+    b.append('<circle cx="%d" cy="%d" r="%d" fill="%s"/>' % (cx, cy, R + 14, "#eadfc8" if dark else "#0c5d63"))
     b.append('<circle cx="%d" cy="%d" r="%d" fill="url(#bowl%s)"/>' % (cx, cy, R, u))
     b.append('<circle cx="%d" cy="%d" r="%.1f" fill="none" stroke="#e9fffb" stroke-width="1" opacity="0.4"/>' % (cx, cy, R - 9))
-    star_col = DEEP if not back else "#bfe9e3"
-    b.append(spiral(cx, cy, 1700 if not back else 1200, 8.0 if not back else 8.2, rnd, star_col, R, 8.6, back))
-    if not back:
+    star_col = "#f1e6cc" if dark else DEEP
+    b.append(spiral(cx, cy, 1700 if dark else 1200, 8.0 if dark else 8.2, rnd, star_col, R, 8.6, back))
+    if dark:
         for _ in range(30):
             x, y = rnd.uniform(40, 640), rnd.uniform(30, 330)
-            b.append(star4(x, y, rnd.uniform(2.5, 6), DEEP, 0.5))
-    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.5" style="mix-blend-mode:multiply"/>' % (VW, VH, u))
+            b.append(star4(x, y, rnd.uniform(2.5, 6), "#f1e6cc", 0.55))
+    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.5" style="mix-blend-mode:%s"/>' % (VW, VH, u, "screen" if dark else "multiply"))
     return '<svg class="art" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">%s</svg>' % (VW, VH, "".join(b))
 
 
@@ -180,44 +183,46 @@ def main():
 @font-face {{ font-family: "Cairo"; font-weight: 700; src: url(../fonts/cairo-arabic-700-normal.woff2) format("woff2"); }}
 @page {{ size: 170mm 240mm; margin: 0; }}
 html, body {{ margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
-.page {{ position: relative; width: 170mm; height: 240mm; overflow: hidden; break-after: page; background: #eadfc8; }}
+.page {{ position: relative; width: 170mm; height: 240mm; overflow: hidden; break-after: page; background: #0b5a60; }}
 .art {{ position: absolute; inset: 0; width: 100%; height: 100%; }}
 
 .title {{
-  position: absolute; left: 0; right: 0; top: 15mm; text-align: center;
-  font-family: "Noto Kufi", sans-serif; font-weight: 800; line-height: 1.0; color: #062f35;
+  position: absolute; left: 0; right: 0; top: 11mm; text-align: center;
+  font-family: "Noto Kufi", sans-serif; font-weight: 800; line-height: 1.0; color: #f6eedc;
+  text-shadow: 0 0.5mm 0 #053238, 0 1.1mm 2.4mm rgba(0,0,0,.35);
 }}
-.title .t1 {{ display: block; font-size: 46pt; color: #0c5d63; }}
-.title .t2 {{ display: block; font-size: 88pt; margin-top: 0.5mm; letter-spacing: -0.5pt; }}
+.title .t1 {{ display: block; font-size: 50pt; color: #f2c97e; }}
+.title .t2 {{ display: block; font-size: 96pt; margin-top: 6.5mm; letter-spacing: -0.5pt; }}
 .author {{
-  position: absolute; left: 0; right: 0; bottom: 13mm; text-align: center; color: #062f35;
-  font-family: "Cairo", sans-serif;
+  position: absolute; left: 50%; width: 112mm; margin-left: -56mm; bottom: 11mm; text-align: center;
+  background: #f6eedc; color: #07383e; border-radius: 40mm; padding: 2.4mm 0 3mm;
+  font-family: "Cairo", sans-serif; box-shadow: 0 1mm 3mm rgba(0,0,0,.35);
 }}
-.author small {{ display: block; font-weight: 400; font-size: 10.5pt; color: #0c5d63; margin-bottom: 0.5mm; }}
-.author b {{ font-weight: 700; font-size: 19pt; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
+.author small {{ display: block; font-weight: 700; font-size: 10.5pt; color: #b87a35; line-height: 1.2; }}
+.author b {{ display: block; font-weight: 700; font-size: 27pt; line-height: 1.25; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
 
 .text {{
-  position: absolute; left: 22mm; right: 22mm; top: 38mm; height: 118mm;
+  position: absolute; left: 22mm; right: 22mm; top: 36mm; height: 124mm;
   display: flex; flex-direction: column; justify-content: center;
 }}
-.text::before {{ content: ""; display: block; width: 16mm; border-top: 1.6pt solid #e9c98e; margin-bottom: 7mm; }}
+.text::before {{ content: ""; display: block; width: 16mm; border-top: 2pt solid #0c8f93; margin-bottom: 7mm; }}
 .text p {{
-  margin: 0 0 3.2mm; text-align: justify;
-  font-family: "Cairo", sans-serif; font-weight: 400; font-size: 11.2pt; line-height: 1.95; color: #f4ecd9;
+  margin: 0 0 3.4mm; text-align: justify;
+  font-family: "Cairo", sans-serif; font-weight: 400; font-size: 11.6pt; line-height: 2.0; color: #07383e;
 }}
-.text p:last-child {{ margin: 0; font-weight: 700; color: #f2cf92; }}
-.sign {{ position: absolute; left: 20mm; width: 70mm; top: 205mm; text-align: right; color: #f4ecd9; font-family: "Cairo", sans-serif; }}
-.sign .bt {{ display: block; font-family: "Noto Kufi", sans-serif; font-weight: 800; font-size: 23pt; line-height: 1.2; }}
-.sign .ba {{ font-weight: 400; font-size: 12pt; color: #f2cf92; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
+.text p:last-child {{ margin: 0; font-weight: 700; color: #0c6a70; }}
+.sign {{ position: absolute; left: 20mm; width: 72mm; top: 200mm; text-align: right; color: #07383e; font-family: "Cairo", sans-serif; }}
+.sign .bt {{ display: block; font-family: "Noto Kufi", sans-serif; font-weight: 800; font-size: 25pt; line-height: 1.2; }}
+.sign .ba {{ font-weight: 700; font-size: 14pt; color: #b87a35; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
 </style></head><body>
 <div class="page">{front}
-  <div class="title"><span class="t1">ثرائد</span><span class="t2">التقوى</span></div>
-  <div class="author"><small>تأليف</small><b>محمد عبدالله</b></div>
+  <div class="title"><span class="t1">{t1}</span><span class="t2">{t2}</span></div>
+  <div class="author"><small>تأليف</small><b>{author}</b></div>
 </div>
 <div class="page">{back}<div class="text">{paras}</div>
-  <div class="sign"><span class="bt">ثرائد التقوى</span><span class="ba">محمد عبدالله</span></div>
+  <div class="sign"><span class="bt">{t1} {t2}</span><span class="ba">{author}</span></div>
 </div>
-</body></html>""".format(front=flat("a"), back=flat("b", back=True), paras=paras)
+</body></html>""".format(front=flat("a"), back=flat("b", back=True), paras=paras, t1=TITLE_HTML[0], t2=TITLE_HTML[1], author=AUTHOR)
     open(os.path.join(HERE, "build", "cover.html"), "w", encoding="utf8").write(html)
 
 
