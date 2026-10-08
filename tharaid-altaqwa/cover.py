@@ -76,85 +76,96 @@ def crumb(cx, cy, r, rnd, fill):
     return '<polygon points="%s" fill="%s"/>' % (" ".join(pts), fill)
 
 
-# the path of crumbs: from the foreground, over the dunes, up into the Milky Way
-TRAIL = [(70, 950), (190, 842), (330, 790), (470, 742), (520, 668), (430, 612), (330, 560), (350, 482),
-         (450, 420), (520, 340), (570, 250), (600, 150)]
+def star4(x, y, r, fill, op=1.0):
+    k = r * 0.22
+    d = "M %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f L %.1f %.1f Z" % (
+        x, y - r, x + k, y - k, x + r, y, x + k, y + k, x, y + r, x - k, y + k, x - r, y, x - k, y - k)
+    return '<path d="%s" fill="%s" opacity="%.2f"/>' % (d, fill, op)
 
 
-def night(u, back=False):
-    rnd = random.Random(11)
+def bread(x, y, r, rnd, base="#d9a35f", light="#f3d49a", dark="#a8702f"):
+    """a flat piece of bread: shadow, body, lit facet"""
+    n = rnd.choice((5, 6, 7))
+    a0 = rnd.uniform(0, 6.28)
+    P = []
+    for i in range(n):
+        a = a0 + i * 2 * math.pi / n + rnd.uniform(-0.28, 0.28)
+        rr = r * rnd.uniform(0.6, 1.1)
+        P.append((rr * math.cos(a), rr * math.sin(a) * 0.85))
+    f = lambda pts, dx=0, dy=0, k=1.0: " ".join("%.1f,%.1f" % (x + dx + p[0] * k, y + dy + p[1] * k) for p in pts)
+    return ('<polygon points="%s" fill="#06292e" opacity="0.28"/>' % f(P, r * 0.18, r * 0.28) +
+            '<polygon points="%s" fill="%s"/>' % (f(P), base) +
+            '<polygon points="%s" fill="%s"/>' % (f(P[: max(3, n // 2 + 1)] + [(0, 0)], -r * 0.05, -r * 0.08, 0.95), light) +
+            '<polygon points="%s" fill="%s" opacity="0.55"/>' % (f(P[n // 2:] + [P[0], (0, 0)], 0, 0, 0.98), dark))
+
+
+BEIGE, SAND, TURQ, DEEP, INK = "#eadfc8", "#d9c8a5", "#19a7a1", "#0c5d63", "#062f35"
+
+
+def blob(x, y, r, rnd, fill, rot=None):
+    """a small rounded crumb"""
+    n = 7
+    a0 = rnd.uniform(0, 6.28) if rot is None else rot
+    P = []
+    for k in range(n):
+        a = a0 + k * 2 * math.pi / n
+        rr = r * rnd.uniform(0.78, 1.08)
+        P.append((x + rr * math.cos(a), y + rr * math.sin(a) * 0.86))
+    d = "M %.1f %.1f " % ((P[0][0] + P[-1][0]) / 2, (P[0][1] + P[-1][1]) / 2)
+    for k in range(n):
+        q, nx = P[k], P[(k + 1) % n]
+        d += "Q %.1f %.1f %.1f %.1f " % (q[0], q[1], (q[0] + nx[0]) / 2, (q[1] + nx[1]) / 2)
+    return '<path d="%sZ" fill="%s"/>' % (d, fill)
+
+
+def spiral(cx, cy, n, spread, rnd, inner, R, big, back=False):
+    """crumbs along the golden-angle spiral: bread inside the bowl, stars once they leave it"""
+    out = []
+    ga = math.pi * (3 - math.sqrt(5))
+    for i in range(1, n):
+        r = spread * math.sqrt(i)
+        a = i * ga
+        x, y = cx + r * math.cos(a), cy + r * math.sin(a)
+        if r < R - 12:
+            t = r / R
+            size = big * (0.25 + 0.75 * t ** 0.9)
+            col = "#fff1c9" if t < 0.18 else ("#f6cd7d" if t < 0.55 else "#e0a14e")
+            out.append('<g opacity="0.25"><path d="M0 0" /></g>' if False else blob(x + 1.4, y + 2.2, size, rnd, "#06292e"))
+            out.append(blob(x, y, size, rnd, col))
+        else:
+            t = min(1.0, (r - R) / 380)
+            sz = (1 - t) ** 1.3 * 9.5 + 1.6
+            if (y < 835 or back) and rnd.random() < 0.30 * (1 - 0.6 * t) + 0.04:
+                out.append(star4(x, y, sz, inner if rnd.random() < 0.7 else "#c9853f", 0.95 - 0.55 * t))
+    return "".join(out)
+
+
+def flat(u, back=False):
+    rnd = random.Random(5)
     b = ["""<defs>
-  <linearGradient id="sky{u}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#050a1c"/><stop offset="0.45" stop-color="#0d1b3a"/><stop offset="0.72" stop-color="#1d3a5c"/><stop offset="0.86" stop-color="#7a6a73"/><stop offset="1" stop-color="#c79a74"/>
-  </linearGradient>
-  <linearGradient id="gold{u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0c4"/><stop offset="0.55" stop-color="#f1b85a"/><stop offset="1" stop-color="#c9822f"/></linearGradient>
-  <linearGradient id="dn1{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#27415f"/><stop offset="1" stop-color="#101d33"/></linearGradient>
-  <linearGradient id="dn2{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16263f"/><stop offset="1" stop-color="#0a1222"/></linearGradient>
-  <linearGradient id="dn3{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1526"/><stop offset="1" stop-color="#05080f"/></linearGradient>
-  <filter id="glow{u}" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <filter id="bigblur{u}" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1100" height="1400"><feGaussianBlur stdDeviation="22"/></filter>
-  <filter id="midblur{u}" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1100" height="1400"><feGaussianBlur stdDeviation="7"/></filter>
+  <radialGradient id="bg{u}" cx="0.5" cy="0.38" r="0.85"><stop offset="0" stop-color="{c0}"/><stop offset="1" stop-color="{c1}"/></radialGradient>
+  <radialGradient id="bowl{u}" cx="0.5" cy="0.45" r="0.62"><stop offset="0" stop-color="#27bfb7"/><stop offset="0.75" stop-color="#14a09b"/><stop offset="1" stop-color="#0d7f85"/></radialGradient>
   <filter id="grain{u}" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="n"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0.5 -0.1"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" seed="9"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0.55 -0.12"/>
   </filter>
-</defs>""".format(u=u),
-         '<rect width="%d" height="%d" fill="url(#sky%s)"/>' % (VW, VH, u)]
-    pts = catmull(TRAIL, 240)
-    # the Milky Way: the far end of the trail, widened and blurred
-    far = [p for p in pts if p[1] < 640]
-    path = "M " + " L ".join("%.1f %.1f" % p for p in far)
-    b.append('<path d="%s" fill="none" stroke="#9fb7e8" stroke-opacity="0.20" stroke-width="150" stroke-linecap="round" filter="url(#bigblur%s)"/>' % (path, u))
-    b.append('<path d="%s" fill="none" stroke="#f6d9a0" stroke-opacity="0.30" stroke-width="46" stroke-linecap="round" filter="url(#midblur%s)"/>' % (path, u))
-    # stars
-    for _ in range(260):
-        x, y = rnd.uniform(0, VW), rnd.uniform(0, 640)
-        r = rnd.choice((0.5, 0.6, 0.8, 1.0, 1.3))
-        b.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#fff6e2" opacity="%.2f"/>' % (x, y, r, rnd.uniform(0.25, 0.9)))
-    for _ in range(14):
-        x, y = rnd.uniform(20, VW - 20), rnd.uniform(20, 560)
-        b.append('<circle cx="%.1f" cy="%.1f" r="1.7" fill="#fffbe9" filter="url(#glow%s)"/>' % (x, y, u))
-    # warm horizon glow
-    b.append('<ellipse cx="300" cy="650" rx="420" ry="90" fill="#f0b97a" opacity="0.34" filter="url(#bigblur%s)"/>' % u)
-    # dunes
-    d1, (x1, y1) = ridge(640, 24, 21, shift=0.2)
-    d2, (x2, y2) = ridge(730, 34, 8, n=7, shift=1.0)
-    d3, (x3, y3) = ridge(830, 36, 3, n=6, shift=2.1)
-    b.append('<path d="%s" fill="url(#dn1%s)"/>' % (d1, u))
-    b.append('<path d="%s" fill="url(#dn2%s)"/>' % (d2, u))
-    b.append('<path d="%s" fill="url(#dn3%s)"/>' % (d3, u))
-    for (xs, ys), col, op in (((x1, y1), "#f2c28a", .55), ((x2, y2), "#9fb5d6", .28)):
-        d = "M %.1f %.1f " % (xs[0], ys[0] + 1.5)
-        for i in range(1, len(xs)):
-            c = (xs[i - 1] + xs[i]) / 2
-            d += "C %.1f %.1f %.1f %.1f %.1f %.1f " % (c, ys[i - 1] + 1.5, c, ys[i] + 1.5, xs[i], ys[i] + 1.5)
-        b.append('<path d="%s" fill="none" stroke="%s" stroke-width="1.3" opacity="%.2f"/>' % (d, col, op))
-    # the crumbs
+</defs>""".format(u=u, c0="#13777b" if back else "#f3ead7", c1="#084a50" if back else "#d9ccb0"),
+         '<rect width="%d" height="%d" fill="url(#bg%s)"/>' % (VW, VH, u)]
     if back:
-        sel = [(p, k) for k, p in enumerate(pts)][::5]
-        sel = [(p, k) for p, k in sel if 600 < p[1] < 770]
-        total = len(pts)
+        cx, cy, R = 650, 985, 215
     else:
-        sel = [(p, k) for k, p in enumerate(pts)][::3]
-        total = len(pts)
-    for (x, y), k in sel:
-        t = k / total
-        size = 17 * (1 - t) ** 1.7 + 2.4
-        x += rnd.uniform(-9, 9) * (1 - t) ** 1.2
-        y += rnd.uniform(-6, 6) * (1 - t) ** 1.2
-        b.append('<g filter="url(#glow%s)">%s</g>' % (u, crumb(x, y, size, rnd, "url(#gold%s)" % u)))
+        cx, cy, R = 340, 628, 200
+    b.append('<circle cx="%d" cy="%d" r="%d" fill="#06292e" opacity="0.2"/>' % (cx + 9, cy + 13, R + 14))
+    b.append('<circle cx="%d" cy="%d" r="%d" fill="%s"/>' % (cx, cy, R + 14, SAND if not back else "#0a4c52"))
+    b.append('<circle cx="%d" cy="%d" r="%d" fill="url(#bowl%s)"/>' % (cx, cy, R, u))
+    b.append('<circle cx="%d" cy="%d" r="%.1f" fill="none" stroke="#e9fffb" stroke-width="1" opacity="0.4"/>' % (cx, cy, R - 9))
+    star_col = DEEP if not back else "#bfe9e3"
+    b.append(spiral(cx, cy, 1700 if not back else 1200, 8.0 if not back else 8.2, rnd, star_col, R, 8.6, back))
     if not back:
-        # a few crumbs drifting up out of the trail like sparks
-        for _ in range(26):
-            k = rnd.randint(70, 200)
-            x, y = pts[k]
-            x += rnd.uniform(-45, 45); y += rnd.uniform(-60, 20)
-            b.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffe3a6" opacity="%.2f" filter="url(#glow%s)"/>' % (x, y, rnd.uniform(0.8, 1.9), rnd.uniform(0.5, 0.95), u))
-        # the traveller at the start of the trail
-        b.append('<g stroke="#8fa6c8" stroke-width="0.9" stroke-opacity="0.55">%s</g>' % traveller(104, 898, 1.5, col="#070b16"))
-    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.45" style="mix-blend-mode:soft-light"/>' % (VW, VH, u))
-    b.append('<defs><linearGradient id="vb%s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03060d" stop-opacity="0"/><stop offset="1" stop-color="#03060d" stop-opacity="0.75"/></linearGradient></defs>' % u)
-    b.append('<rect y="780" width="%d" height="180" fill="url(#vb%s)"/>' % (VW, u))
+        for _ in range(30):
+            x, y = rnd.uniform(40, 640), rnd.uniform(30, 330)
+            b.append(star4(x, y, rnd.uniform(2.5, 6), DEEP, 0.5))
+    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.5" style="mix-blend-mode:multiply"/>' % (VW, VH, u))
     return '<svg class="art" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">%s</svg>' % (VW, VH, "".join(b))
 
 
@@ -163,44 +174,41 @@ def main():
     html = """<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>الغلاف</title>
 <style>
-@font-face {{ font-family: "Lalezar"; src: url(../fonts/lalezar-arabic-400-normal.woff2) format("woff2"); }}
+@font-face {{ font-family: "Noto Kufi"; font-weight: 800; src: url(../fonts/noto-kufi-arabic-arabic-800-normal.woff2) format("woff2"); }}
 @font-face {{ font-family: "Cairo"; font-weight: 300; src: url(../fonts/cairo-arabic-300-normal.woff2) format("woff2"); }}
 @font-face {{ font-family: "Cairo"; font-weight: 400; src: url(../fonts/cairo-arabic-400-normal.woff2) format("woff2"); }}
 @font-face {{ font-family: "Cairo"; font-weight: 700; src: url(../fonts/cairo-arabic-700-normal.woff2) format("woff2"); }}
 @page {{ size: 170mm 240mm; margin: 0; }}
 html, body {{ margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
-.page {{ position: relative; width: 170mm; height: 240mm; overflow: hidden; break-after: page; background: #1a2433; }}
+.page {{ position: relative; width: 170mm; height: 240mm; overflow: hidden; break-after: page; background: #eadfc8; }}
 .art {{ position: absolute; inset: 0; width: 100%; height: 100%; }}
 
 .title {{
-  position: absolute; left: 0; right: 0; top: 17mm; text-align: center;
-  font-family: "Lalezar", sans-serif; line-height: 0.95; color: #fff3de;
-  text-shadow: 0 0.6mm 0 #b5683c, 0 1.2mm 0 #8a4a30, 0 2.4mm 4mm rgba(20,10,10,.45);
+  position: absolute; left: 0; right: 0; top: 15mm; text-align: center;
+  font-family: "Noto Kufi", sans-serif; font-weight: 800; line-height: 1.0; color: #062f35;
 }}
-.title .t1 {{ display: block; font-size: 62pt; }}
-.title .t2 {{ display: block; font-size: 92pt; margin-top: 1mm; }}
-.rule {{ position: absolute; left: 50%; top: 100mm; width: 30mm; margin-left: -15mm; border-top: 0.9pt solid rgba(255,236,205,.8); }}
+.title .t1 {{ display: block; font-size: 46pt; color: #0c5d63; }}
+.title .t2 {{ display: block; font-size: 88pt; margin-top: 0.5mm; letter-spacing: -0.5pt; }}
 .author {{
-  position: absolute; left: 0; right: 0; bottom: 14mm; text-align: center; color: #fbe8cb;
+  position: absolute; left: 0; right: 0; bottom: 13mm; text-align: center; color: #062f35;
   font-family: "Cairo", sans-serif;
 }}
-.author small {{ display: block; font-weight: 400; font-size: 11pt; letter-spacing: 0; opacity: 1; color: #f2c88f; margin-bottom: 1mm; }}
-.author b {{ font-weight: 700; font-size: 20pt; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
+.author small {{ display: block; font-weight: 400; font-size: 10.5pt; color: #0c5d63; margin-bottom: 0.5mm; }}
+.author b {{ font-weight: 700; font-size: 19pt; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
 
 .text {{
-  position: absolute; left: 22mm; right: 22mm; top: 40mm; height: 118mm;
+  position: absolute; left: 22mm; right: 22mm; top: 38mm; height: 118mm;
   display: flex; flex-direction: column; justify-content: center;
-  padding: 0; box-sizing: border-box;
 }}
-.text::before {{ content: ""; display: block; width: 16mm; border-top: 1.4pt solid #e9b779; margin-bottom: 7mm; }}
+.text::before {{ content: ""; display: block; width: 16mm; border-top: 1.6pt solid #e9c98e; margin-bottom: 7mm; }}
 .text p {{
   margin: 0 0 3.2mm; text-align: justify;
-  font-family: "Cairo", sans-serif; font-weight: 300; font-size: 11pt; line-height: 1.95; color: #fbf1e0;
+  font-family: "Cairo", sans-serif; font-weight: 400; font-size: 11.2pt; line-height: 1.95; color: #f4ecd9;
 }}
-.text p:last-child {{ margin: 0; font-weight: 400; color: #f6cf94; }}
-.sign {{ position: absolute; left: 0; right: 0; bottom: 14mm; text-align: center; color: #fbe8cb; font-family: "Cairo", sans-serif; }}
-.sign .bt {{ display: block; font-family: "Lalezar", sans-serif; font-size: 30pt; line-height: 1.1; text-shadow: 0 0.5mm 0 #b5683c; }}
-.sign .ba {{ font-weight: 400; font-size: 12pt; opacity: .9; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
+.text p:last-child {{ margin: 0; font-weight: 700; color: #f2cf92; }}
+.sign {{ position: absolute; left: 20mm; width: 70mm; top: 205mm; text-align: right; color: #f4ecd9; font-family: "Cairo", sans-serif; }}
+.sign .bt {{ display: block; font-family: "Noto Kufi", sans-serif; font-weight: 800; font-size: 23pt; line-height: 1.2; }}
+.sign .ba {{ font-weight: 400; font-size: 12pt; color: #f2cf92; font-feature-settings: "rlig" 0, "liga" 0, "calt" 0; }}
 </style></head><body>
 <div class="page">{front}
   <div class="title"><span class="t1">ثرائد</span><span class="t2">التقوى</span></div>
@@ -209,7 +217,7 @@ html, body {{ margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-co
 <div class="page">{back}<div class="text">{paras}</div>
   <div class="sign"><span class="bt">ثرائد التقوى</span><span class="ba">محمد عبدالله</span></div>
 </div>
-</body></html>""".format(front=night("a"), back=night("b", back=True), paras=paras)
+</body></html>""".format(front=flat("a"), back=flat("b", back=True), paras=paras)
     open(os.path.join(HERE, "build", "cover.html"), "w", encoding="utf8").write(html)
 
 
