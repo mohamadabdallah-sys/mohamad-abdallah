@@ -330,9 +330,26 @@ TASHKEEL = re.compile("[\u064B-\u0652\u0670\u0640]")
 VOWELS = re.compile("[\u064E-\u0650\u0652\u0670\u0640]")      # fatha, damma, kasra, sukun, dagger alif, tatweel
 
 
+SHADDA_WORDS = [
+    (r"السلام(?![\u0621-\u064A])", "السّلام"),
+    (r"اللهم(?![\u0621-\u064A])", "اللهمّ"),
+    (r"(?<![\u0621-\u064A])(و?ف?)صلى(?![\u0621-\u064A])", r"\1صلّى"),
+    (r"(?<![\u0621-\u064A\u0651])كيفية(?![\u0621-\u064A])", "كيفيّة"),
+    (r"(?<![\u0621-\u064A\u0651])السجادية(?![\u0621-\u064A])", "السجّاديّة"),
+]
+
+
+def shadda_words(t):
+    """words that must always carry their shadda (the formulas after the Imams' names, اللهمّ …)"""
+    for pat, rep in SHADDA_WORDS:
+        t = re.sub(pat, rep, t)
+    return t
+
+
 def plain_ar(t):
     """one style for the whole book outside the Qur'an: shadda and tanween only"""
     t = VOWELS.sub("", t)
+    t = shadda_words(t)
     t = re.sub("\u064B(\u0651?)\u0627", "\\1\u0627\u064B", t)       # fathatan on the alif: كتاباً
     t = re.sub("(?<![\u0621-\u064A])([وفبكتل]?)(ال|ل)\u0644\u0651(?=\u0647)", "\\1\\2\u0644", t)   # الله, لله, بالله: no shadda
     return t
@@ -349,7 +366,7 @@ def render_inline(ctx, t):
     t = re.sub(r"«([^«»]{12,})»", r'<span class="q">«\1»</span>', t)
     t = re.sub(r"(\d+)", lambda m: '<span class="ayah">%s</span>' % html.escape(ctx.verses[int(m.group(1))]), t)
     t = re.sub(r"(\d+)",
-               lambda m: '<span class="fn" data-note="%s"></span>' % html.escape(ctx.notes[int(m.group(1))].translate(AR_DIGITS), quote=True), t)
+               lambda m: '<span class="fn" data-note="%s"></span>' % html.escape(shadda_words(ctx.notes[int(m.group(1))]).translate(AR_DIGITS), quote=True), t)
     return t
 
 

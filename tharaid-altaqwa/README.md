@@ -3,7 +3,7 @@
 The typeset edition of the book «ثرائد التقوى» by Mohamad Abdallah (محمد عبدالله), built from the author's Word manuscript.
 
 ## Files
-- `ثرائد-التقوى.pdf` — the complete book: front cover, 363 pages, back cover, with PDF bookmarks for every topic.
+- `ثرائد-التقوى.pdf` — the complete book: front cover, 348 pages, back cover, with PDF bookmarks for every topic.
 - `للطباعة-المتن.pdf` — the interior only (17 × 24 cm), for the printing house.
 - `للطباعة-الغلاف.pdf` — front and back cover (17 × 24 cm each).
 - `غلاف-أمامي.png`, `غلاف-خلفي.png` — cover images (200 dpi) for stores and social media.
@@ -12,6 +12,8 @@ The typeset edition of the book «ثرائد التقوى» by Mohamad Abdallah 
 - Language corrections and removal of duplicated passages (`src/fixes.txt`, `src/structure.txt`).
 - Every Qur'an quotation is matched in the Mushaf, printed in Uthmani script and referenced (sura and verse) in a footnote; wrong references were corrected from the matched text.
 - Every source (inline brackets, end-of-topic source lists, Word footnotes) is a footnote at the bottom of its page, numbered from ١ on each page: the number in the text, `١: المصدر` in the footnote.
+- `src/text.txt` is the final, proofread and vocalised text (shadda and tanween only, outside the Qur'an); `build.py` reads it (falling back to `prep.py`'s output when it is absent).
+- Every topic ends with «والحمد لله ربّ العالمين»; the dedication fits one page; a «المصادر والمراجع» page precedes the table of contents.
 - Each topic starts on a new page with its number and an ornamental title; page numbers at the bottom; running head with the topic title; table of contents at the end.
 
 ## Build
