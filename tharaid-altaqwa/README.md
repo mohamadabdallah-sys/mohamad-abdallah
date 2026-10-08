@@ -3,7 +3,8 @@
 The typeset edition of the book «ثرائد التقوى» by Mohamad Abdallah (محمد عبدالله), built from the author's Word manuscript.
 
 ## Files
-- `ثرائد-التقوى.pdf` — the complete book: front cover, 348 pages, back cover, with PDF bookmarks for every topic.
+- `ثرائد-التقوى.pdf` — the complete book: front cover, 329 pages, back cover, with PDF bookmarks for every topic.
+- `ثرائد-التقوى.docx` — the Word edition (real footnotes at the foot of each page, covers, table of contents at the end: press «Yes» when Word offers to update the fields).
 - `للطباعة-المتن.pdf` — the interior only (17 × 24 cm), for the printing house.
 - `للطباعة-الغلاف.pdf` — front and back cover (17 × 24 cm each).
 - `غلاف-أمامي.png`, `غلاف-خلفي.png` — cover images (200 dpi) for stores and social media.

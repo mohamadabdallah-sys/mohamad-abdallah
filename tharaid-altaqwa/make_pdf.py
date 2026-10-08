@@ -48,6 +48,10 @@ def main():
     for i, name in ((0, "غلاف-أمامي.png"), (1, "غلاف-خلفي.png")):
         cover[i].get_pixmap(dpi=200).save(P(name))
 
+    # the Word edition (real footnotes, covers, table of contents at the end)
+    run("python3", "word_data.py")
+    run("node", "make_word.js")
+
 
 if __name__ == "__main__":
     main()
