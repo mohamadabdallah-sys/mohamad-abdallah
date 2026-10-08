@@ -49,81 +49,112 @@ def traveller(x, y, s=1.0, col="#1a1218"):
     return g + "</g>"
 
 
-def sky_and_sun(u, dark=False):
-    top, mid, hor = ("#1a2433", "#4a3a4a", "#c98a5e") if dark else ("#3a4d63", "#a98a86", "#f0c487")
-    return """<defs>
+def catmull(pts, n=200):
+    """a smooth curve through the given points (Catmull-Rom), as n samples"""
+    P = [pts[0]] + pts + [pts[-1]]
+    out = []
+    segs = len(pts) - 1
+    for k in range(segs):
+        p0, p1, p2, p3 = P[k], P[k + 1], P[k + 2], P[k + 3]
+        for t in [i / (n // segs) for i in range(n // segs)]:
+            t2, t3 = t * t, t * t * t
+            out.append(tuple(0.5 * ((2 * p1[a]) + (-p0[a] + p2[a]) * t + (2 * p0[a] - 5 * p1[a] + 4 * p2[a] - p3[a]) * t2
+                                    + (-p0[a] + 3 * p1[a] - 3 * p2[a] + p3[a]) * t3) for a in (0, 1)))
+    out.append(pts[-1])
+    return out
+
+
+def crumb(cx, cy, r, rnd, fill):
+    """one irregular piece of bread"""
+    n = rnd.choice((5, 6, 7))
+    a0 = rnd.uniform(0, 6.28)
+    pts = []
+    for i in range(n):
+        a = a0 + i * 2 * math.pi / n + rnd.uniform(-0.25, 0.25)
+        rr = r * rnd.uniform(0.62, 1.12)
+        pts.append("%.1f,%.1f" % (cx + rr * math.cos(a), cy + rr * math.sin(a) * 0.82))
+    return '<polygon points="%s" fill="%s"/>' % (" ".join(pts), fill)
+
+
+# the path of crumbs: from the foreground, over the dunes, up into the Milky Way
+TRAIL = [(70, 950), (190, 842), (330, 790), (470, 742), (520, 668), (430, 612), (330, 560), (350, 482),
+         (450, 420), (520, 340), (570, 250), (600, 150)]
+
+
+def night(u, back=False):
+    rnd = random.Random(11)
+    b = ["""<defs>
   <linearGradient id="sky{u}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="{top}"/><stop offset="0.38" stop-color="{mid}"/><stop offset="0.66" stop-color="{hor}"/><stop offset="0.8" stop-color="#f6dcab"/>
+    <stop offset="0" stop-color="#050a1c"/><stop offset="0.45" stop-color="#0d1b3a"/><stop offset="0.72" stop-color="#1d3a5c"/><stop offset="0.86" stop-color="#7a6a73"/><stop offset="1" stop-color="#c79a74"/>
   </linearGradient>
-  <radialGradient id="sun{u}" cx="0.5" cy="0.5" r="0.5">
-    <stop offset="0" stop-color="#fff6df"/><stop offset="0.55" stop-color="#fbe2b0"/><stop offset="1" stop-color="#f2b877"/>
-  </radialGradient>
-  <radialGradient id="halo{u}" cx="0.5" cy="0.5" r="0.5">
-    <stop offset="0" stop-color="#ffe9bd" stop-opacity="0.85"/><stop offset="0.5" stop-color="#f6c98a" stop-opacity="0.28"/><stop offset="1" stop-color="#f6c98a" stop-opacity="0"/>
-  </radialGradient>
-  <linearGradient id="d1{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c98962"/><stop offset="1" stop-color="#8f5a4c"/></linearGradient>
-  <linearGradient id="d2{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e5a4e"/><stop offset="1" stop-color="#5b3a41"/></linearGradient>
-  <linearGradient id="d3{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f3340"/><stop offset="1" stop-color="#2a1b29"/></linearGradient>
-  <linearGradient id="d4{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1b29"/><stop offset="1" stop-color="#150e18"/></linearGradient>
-  <filter id="soft{u}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
-  <filter id="soft2{u}" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  <linearGradient id="gold{u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0c4"/><stop offset="0.55" stop-color="#f1b85a"/><stop offset="1" stop-color="#c9822f"/></linearGradient>
+  <linearGradient id="dn1{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#27415f"/><stop offset="1" stop-color="#101d33"/></linearGradient>
+  <linearGradient id="dn2{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16263f"/><stop offset="1" stop-color="#0a1222"/></linearGradient>
+  <linearGradient id="dn3{u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1526"/><stop offset="1" stop-color="#05080f"/></linearGradient>
+  <filter id="glow{u}" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="bigblur{u}" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1100" height="1400"><feGaussianBlur stdDeviation="22"/></filter>
+  <filter id="midblur{u}" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1100" height="1400"><feGaussianBlur stdDeviation="7"/></filter>
   <filter id="grain{u}" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.82  0 0 0 0.55 -0.12"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="n"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0.5 -0.1"/>
   </filter>
-</defs>""".format(u=u, top=top, mid=mid, hor=hor)
-
-
-def haze(u):
-    """soft dusty cloud bands"""
-    b = ['<g filter="url(#soft{u})" fill="#f8e4c4">'.format(u=u)]
-    for cx, cy, rx, ry, op in ((110, 330, 150, 18, .28), (560, 270, 170, 16, .22), (300, 440, 240, 20, .30), (620, 520, 150, 14, .30), (60, 560, 140, 14, .35)):
-        b.append('<ellipse cx="%d" cy="%d" rx="%d" ry="%d" opacity="%.2f"/>' % (cx, cy, rx, ry, op))
-    b.append("</g>")
-    return "".join(b)
-
-
-def scene(u, back=False):
-    b = [sky_and_sun(u, dark=back),
+</defs>""".format(u=u),
          '<rect width="%d" height="%d" fill="url(#sky%s)"/>' % (VW, VH, u)]
-    cx, cy, r = (420, 700, 120) if back else (420, 590, 150)
-    b.append('<circle cx="%d" cy="%d" r="%d" fill="url(#halo%s)"/>' % (cx, cy, r * 3.1, u))
-    b.append('<circle cx="%d" cy="%d" r="%d" fill="url(#sun%s)" %s/>' % (cx, cy, r, u, 'opacity="0.78"' if back else ""))
-    b.append(haze(u))
-    # dunes, far to near
-    p1, (x1, y1) = ridge(640, 26, 3, shift=0.3)
-    b.append('<path d="%s" fill="url(#d1%s)"/>' % (p1, u))
-    b.append('<path d="%s" fill="#ffd9a0" opacity="0.18" filter="url(#soft2%s)"/>' % (ridge(636, 26, 3, shift=0.3)[0], u))
-    p2, (x2, y2) = ridge(712, 34, 11, n=7, shift=1.1)
-    b.append('<path d="%s" fill="url(#d2%s)"/>' % (p2, u))
-    p3, (x3, y3) = ridge(790, 40, 5, n=6, shift=2.0)
-    b.append('<path d="%s" fill="url(#d3%s)"/>' % (p3, u))
-    p4, (x4, y4) = ridge(880, 30, 9, n=5, shift=0.7)
-    b.append('<path d="%s" fill="url(#d4%s)"/>' % (p4, u))
-    # sun-lit crest lines
-    for (xs, ys), col in (((x2, y2), "#ffd9a0"), ((x3, y3), "#e9a77a")):
-        d = "M %.1f %.1f " % (xs[0], ys[0] + 2)
+    pts = catmull(TRAIL, 240)
+    # the Milky Way: the far end of the trail, widened and blurred
+    far = [p for p in pts if p[1] < 640]
+    path = "M " + " L ".join("%.1f %.1f" % p for p in far)
+    b.append('<path d="%s" fill="none" stroke="#9fb7e8" stroke-opacity="0.20" stroke-width="150" stroke-linecap="round" filter="url(#bigblur%s)"/>' % (path, u))
+    b.append('<path d="%s" fill="none" stroke="#f6d9a0" stroke-opacity="0.30" stroke-width="46" stroke-linecap="round" filter="url(#midblur%s)"/>' % (path, u))
+    # stars
+    for _ in range(260):
+        x, y = rnd.uniform(0, VW), rnd.uniform(0, 640)
+        r = rnd.choice((0.5, 0.6, 0.8, 1.0, 1.3))
+        b.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#fff6e2" opacity="%.2f"/>' % (x, y, r, rnd.uniform(0.25, 0.9)))
+    for _ in range(14):
+        x, y = rnd.uniform(20, VW - 20), rnd.uniform(20, 560)
+        b.append('<circle cx="%.1f" cy="%.1f" r="1.7" fill="#fffbe9" filter="url(#glow%s)"/>' % (x, y, u))
+    # warm horizon glow
+    b.append('<ellipse cx="300" cy="650" rx="420" ry="90" fill="#f0b97a" opacity="0.34" filter="url(#bigblur%s)"/>' % u)
+    # dunes
+    d1, (x1, y1) = ridge(640, 24, 21, shift=0.2)
+    d2, (x2, y2) = ridge(730, 34, 8, n=7, shift=1.0)
+    d3, (x3, y3) = ridge(830, 36, 3, n=6, shift=2.1)
+    b.append('<path d="%s" fill="url(#dn1%s)"/>' % (d1, u))
+    b.append('<path d="%s" fill="url(#dn2%s)"/>' % (d2, u))
+    b.append('<path d="%s" fill="url(#dn3%s)"/>' % (d3, u))
+    for (xs, ys), col, op in (((x1, y1), "#f2c28a", .55), ((x2, y2), "#9fb5d6", .28)):
+        d = "M %.1f %.1f " % (xs[0], ys[0] + 1.5)
         for i in range(1, len(xs)):
             c = (xs[i - 1] + xs[i]) / 2
-            d += "C %.1f %.1f %.1f %.1f %.1f %.1f " % (c, ys[i - 1] + 2, c, ys[i] + 2, xs[i], ys[i] + 2)
-        b.append('<path d="%s" fill="none" stroke="%s" stroke-width="1.4" opacity="0.5"/>' % (d, col))
+            d += "C %.1f %.1f %.1f %.1f %.1f %.1f " % (c, ys[i - 1] + 1.5, c, ys[i] + 1.5, xs[i], ys[i] + 1.5)
+        b.append('<path d="%s" fill="none" stroke="%s" stroke-width="1.3" opacity="%.2f"/>' % (d, col, op))
+    # the crumbs
+    if back:
+        sel = [(p, k) for k, p in enumerate(pts)][::5]
+        sel = [(p, k) for p, k in sel if 600 < p[1] < 770]
+        total = len(pts)
+    else:
+        sel = [(p, k) for k, p in enumerate(pts)][::3]
+        total = len(pts)
+    for (x, y), k in sel:
+        t = k / total
+        size = 17 * (1 - t) ** 1.7 + 2.4
+        x += rnd.uniform(-9, 9) * (1 - t) ** 1.2
+        y += rnd.uniform(-6, 6) * (1 - t) ** 1.2
+        b.append('<g filter="url(#glow%s)">%s</g>' % (u, crumb(x, y, size, rnd, "url(#gold%s)" % u)))
     if not back:
-        # the traveller, on the second dune, with a long shadow and a trail of footprints
-        tx, ty = 214, 716
-        b.append('<path d="M %d %d L %d %d L %d %d Z" fill="#3b2634" opacity="0.5"/>' % (tx - 6, ty + 5, tx + 210, ty + 30, tx + 14, ty + 10))
-        b.append(traveller(tx, ty, 1.85))
-        rnd = random.Random(2)
-        for i in range(11):
-            fx = tx + 44 + i * 26 + rnd.uniform(-2, 2)
-            fy = ty + 9 + i * 5.2 + (i * i) * 0.14
-            b.append('<ellipse cx="%.1f" cy="%.1f" rx="4.4" ry="1.6" fill="#3b2634" opacity="%.2f"/>' % (fx, fy, 0.5 - i * 0.03))
-    # film grain over everything
-    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.5" style="mix-blend-mode:soft-light"/>' % (VW, VH, u))
-    # top and bottom darkening so the type stays legible
-    b.append('<defs><linearGradient id="vt%s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101827" stop-opacity="0.85"/><stop offset="0.6" stop-color="#101827" stop-opacity="0.45"/><stop offset="1" stop-color="#101827" stop-opacity="0"/></linearGradient>'
-             '<linearGradient id="vb%s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0710" stop-opacity="0"/><stop offset="1" stop-color="#0b0710" stop-opacity="0.7"/></linearGradient></defs>' % (u, u))
-    b.append('<rect width="%d" height="%d" fill="url(#vt%s)"%s/>' % (VW, 600 if back else 360, u, ' opacity="1"' if back else ""))
-    b.append('<rect y="740" width="%d" height="220" fill="url(#vb%s)"/>' % (VW, u))
+        # a few crumbs drifting up out of the trail like sparks
+        for _ in range(26):
+            k = rnd.randint(70, 200)
+            x, y = pts[k]
+            x += rnd.uniform(-45, 45); y += rnd.uniform(-60, 20)
+            b.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffe3a6" opacity="%.2f" filter="url(#glow%s)"/>' % (x, y, rnd.uniform(0.8, 1.9), rnd.uniform(0.5, 0.95), u))
+        # the traveller at the start of the trail
+        b.append('<g stroke="#8fa6c8" stroke-width="0.9" stroke-opacity="0.55">%s</g>' % traveller(104, 898, 1.5, col="#070b16"))
+    b.append('<rect width="%d" height="%d" filter="url(#grain%s)" opacity="0.45" style="mix-blend-mode:soft-light"/>' % (VW, VH, u))
+    b.append('<defs><linearGradient id="vb%s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#03060d" stop-opacity="0"/><stop offset="1" stop-color="#03060d" stop-opacity="0.75"/></linearGradient></defs>' % u)
+    b.append('<rect y="780" width="%d" height="180" fill="url(#vb%s)"/>' % (VW, u))
     return '<svg class="art" viewBox="0 0 %d %d" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">%s</svg>' % (VW, VH, "".join(b))
 
 
@@ -178,7 +209,7 @@ html, body {{ margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-co
 <div class="page">{back}<div class="text">{paras}</div>
   <div class="sign"><span class="bt">ثرائد التقوى</span><span class="ba">محمد عبدالله</span></div>
 </div>
-</body></html>""".format(front=scene("a"), back=scene("b", back=True), paras=paras)
+</body></html>""".format(front=night("a"), back=night("b", back=True), paras=paras)
     open(os.path.join(HERE, "build", "cover.html"), "w", encoding="utf8").write(html)
 
 
