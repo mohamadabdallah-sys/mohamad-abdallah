@@ -93,7 +93,8 @@ header h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-block: 4px 6px; }
 .warn h2 { color: var(--coral); }
 .mistakes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
 .mis { background: var(--paper); border-radius: 10px; padding: 10px 14px; font-size: .9rem; }
-.mis .no { color: var(--coral); text-decoration: line-through; text-decoration-thickness: 1px; }
+.mis .no { color: var(--coral); }
+.mis .no::before { content: "✗ "; font-family: var(--f-body); }
 .mis .yes { color: var(--c); font-weight: 600; }
 
 /* activity */
@@ -108,6 +109,7 @@ header h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-block: 4px 6px; }
 table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 100%; }
 th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-size: .92rem; }
 th { background: var(--ground); font-family: var(--f-display); font-weight: 600; font-size: .85rem; }
+td.m { display: table-cell; }
 td.blank { min-width: 64px; color: var(--ink-3); }
 .ask { background: var(--gold-soft); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
 .ask b { color: var(--gold); }
@@ -138,11 +140,18 @@ footer { padding: 14px clamp(16px, 4vw, 40px); font-size: .8rem; color: var(--in
 @media (max-width: 560px) {
   .def { grid-template-columns: 1fr; }
 }
+@page { size: A4; margin: 12mm 12mm 14mm; }
 @media print {
-  body { background: #fff; padding: 0; }
-  .card { border: 0; }
+  body { background: #fff; padding: 0; font-size: 14px; }
+  .card { border: 0; border-radius: 0; max-width: none; }
   .explorer { display: none; }
-  details { display: block; }
+  section { padding: 16px 8px; }
+  .rule, .mis, .station, .fact, table, .ask { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  details { break-before: page; border: 0; padding: 0; }
+  summary { list-style: none; font-size: 1.2rem; margin-bottom: 8px; }
+  summary::-webkit-details-marker { display: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
 
