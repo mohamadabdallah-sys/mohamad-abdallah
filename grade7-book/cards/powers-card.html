@@ -1,0 +1,382 @@
+<title>بطاقة القوى وقواعدها</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap">
+<style>
+/* Layout: one A4-style lesson card, RTL; concept → rules grid → mistakes → exploratory activity in three stations */
+:root {
+  --ground: #E7EEEE;
+  --paper: #FFFFFF;
+  --ink: #15262B;
+  --ink-2: #4A5C62;
+  --ink-3: #7A8A90;
+  --line: #D6E1E2;
+  --c: #0E7C7B;          /* lesson teal, as in the grade 7 book */
+  --c-soft: #E3F2F1;
+  --gold: #B7791F;
+  --gold-soft: #FBF1DF;
+  --coral: #C2452F;
+  --coral-soft: #FBE9E5;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Readex Pro", "Segoe UI", Tahoma, sans-serif;
+  --f-math: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0C1315; --paper: #141D20; --ink: #E5EDEE; --ink-2: #A9B9BD; --ink-3: #7D8D91;
+    --line: #26353A; --c: #3DB8B4; --c-soft: #15302F; --gold: #E0A94A; --gold-soft: #2E2615;
+    --coral: #EE8A74; --coral-soft: #33201C;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0C1315; --paper: #141D20; --ink: #E5EDEE; --ink-2: #A9B9BD; --ink-3: #7D8D91;
+  --line: #26353A; --c: #3DB8B4; --c-soft: #15302F; --gold: #E0A94A; --gold-soft: #2E2615;
+  --coral: #EE8A74; --coral-soft: #33201C;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.75;
+  padding-inline: 16px; padding-block: 24px 48px;
+}
+.card {
+  max-width: 880px; margin-inline: auto; background: var(--paper);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+section { padding: 24px clamp(16px, 4vw, 40px); border-top: 1px solid var(--line); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.35; margin: 0; }
+h2 { font-size: 1.3rem; color: var(--c); display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+h2 .tag { font-size: .75rem; font-weight: 500; color: var(--ink-3); letter-spacing: .02em; }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 10px; max-width: 68ch; }
+
+/* math: always left-to-right inside Arabic text */
+.m { direction: ltr; unicode-bidi: isolate; display: inline-block; font-family: var(--f-math); font-size: 1.12em; white-space: nowrap; }
+.m sup { font-size: .68em; line-height: 0; }
+.big { font-size: 1.6rem; }
+
+/* header */
+header { padding: 28px clamp(16px, 4vw, 40px) 22px; background: var(--c-soft); }
+.eyebrow { font-size: .8rem; color: var(--c); font-weight: 600; letter-spacing: .03em; }
+header h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-block: 4px 6px; }
+.vocab { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .85rem; color: var(--ink-2); margin: 10px 0 0; padding: 0; list-style: none; }
+.vocab b { color: var(--ink); font-weight: 600; }
+
+/* definition */
+.def { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.anatomy { text-align: center; padding: 14px 20px; border: 1px dashed var(--c); border-radius: 12px; }
+.anatomy .m { font-size: 3.2rem; line-height: 1.1; }
+.anatomy .m sup { color: var(--gold); }
+.anatomy .lbls { display: flex; justify-content: center; gap: 22px; font-size: .8rem; color: var(--ink-2); }
+.anatomy .lbls span:first-child { color: var(--gold); font-weight: 600; }
+.anatomy .lbls span:last-child { color: var(--c); font-weight: 600; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-top: 14px; }
+.fact { background: var(--ground); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+.fact b { display: block; font-family: var(--f-display); font-weight: 600; font-size: .9rem; color: var(--ink); }
+
+/* rules */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.rule { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rule .name { font-family: var(--f-display); font-weight: 600; font-size: .92rem; }
+.rule .name small { color: var(--ink-3); font-weight: 500; font-family: var(--f-body); }
+.rule .law { color: var(--c); font-size: 1.25rem; text-align: center; padding-block: 4px; }
+.rule .ex { font-size: .88rem; color: var(--ink-2); border-top: 1px dotted var(--line); padding-top: 6px; }
+.order { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .9rem; }
+.order span.step { background: var(--c-soft); color: var(--ink); border-radius: 999px; padding: 2px 12px; }
+.order .arr { color: var(--ink-3); }
+
+/* mistakes */
+.warn { background: var(--coral-soft); }
+.warn h2 { color: var(--coral); }
+.mistakes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.mis { background: var(--paper); border-radius: 10px; padding: 10px 14px; font-size: .9rem; }
+.mis .no { color: var(--coral); text-decoration: line-through; text-decoration-thickness: 1px; }
+.mis .yes { color: var(--c); font-weight: 600; }
+
+/* activity */
+.act-head { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .85rem; color: var(--ink-2); margin-bottom: 14px; }
+.act-head b { color: var(--ink); }
+.station { border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 14px; }
+.station h3 { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.station h3 .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--c); color: var(--paper); display: grid; place-items: center; font-size: .9rem; }
+.station ol { margin: 0 0 10px; padding-inline-start: 22px; }
+.station li { margin-bottom: 2px; }
+.tbl-wrap { overflow-x: auto; margin-block: 8px 10px; }
+table { border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: center; font-size: .92rem; }
+th { background: var(--ground); font-family: var(--f-display); font-weight: 600; font-size: .85rem; }
+td.blank { min-width: 64px; color: var(--ink-3); }
+.ask { background: var(--gold-soft); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+.ask b { color: var(--gold); }
+.conclude { margin-top: 10px; font-size: .92rem; }
+.conclude .fill { display: inline-block; min-width: 110px; border-bottom: 1.5px dashed var(--ink-3); }
+
+/* explorer */
+.explorer { background: var(--c-soft); border-radius: 12px; padding: 16px; margin-top: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.controls label { display: flex; flex-direction: column; gap: 2px; font-size: .8rem; color: var(--ink-2); }
+.controls select { font: inherit; font-size: .95rem; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); min-width: 74px; }
+.controls select:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.out { margin-top: 12px; background: var(--paper); border-radius: 10px; padding: 12px 14px; overflow-x: auto; }
+.out .line { direction: ltr; text-align: left; font-family: var(--f-math); font-size: 1.15rem; white-space: nowrap; }
+.out .line sup { font-size: .68em; }
+.out .note { font-size: .88rem; color: var(--ink-2); margin-top: 6px; }
+.out .f2 { color: var(--gold); }
+.out .f1 { color: var(--c); }
+.out .cancel { text-decoration: line-through; color: var(--ink-3); }
+
+details { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; color: var(--c); }
+summary:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+details ul { margin: 8px 0 0; padding-inline-start: 20px; font-size: .92rem; }
+
+footer { padding: 14px clamp(16px, 4vw, 40px); font-size: .8rem; color: var(--ink-3); border-top: 1px solid var(--line); }
+
+@media (max-width: 560px) {
+  .def { grid-template-columns: 1fr; }
+}
+@media print {
+  body { background: #fff; padding: 0; }
+  .card { border: 0; }
+  .explorer { display: none; }
+  details { display: block; }
+}
+</style>
+
+<article class="card" dir="rtl" lang="ar">
+  <header>
+    <div class="eyebrow">الصفّ السابع · المحور الأوّل: الأعداد · بطاقة شرح</div>
+    <h1>القوى وقواعدها</h1>
+    <p>القوّة طريقة مختصرة لكتابة ضرب عدد في نفسه عدّة مرّات.</p>
+    <ul class="vocab">
+      <li><b>قوّة</b> Power · Puissance</li>
+      <li><b>أساس</b> Base</li>
+      <li><b>أُسّ</b> Exponent · Exposant</li>
+      <li><b>مربّع</b> Square · Carré</li>
+      <li><b>مكعّب</b> Cube</li>
+    </ul>
+  </header>
+
+  <!-- 1. Concept -->
+  <section>
+    <h2>المفهوم <span class="tag">ماذا نعني بالقوّة؟</span></h2>
+    <div class="def">
+      <div>
+        <p>القوّة <span class="m">a<sup>n</sup></span> هي جداء <span class="m">n</span> عاملًا كلّ منها يساوي <span class="m">a</span>:</p>
+        <p class="m big">a<sup>n</sup> = a × a × … × a <span style="font-size:.6em">(n عاملًا)</span></p>
+        <p>مثال: <span class="m">2<sup>5</sup> = 2 × 2 × 2 × 2 × 2 = 32</span>، وليس <span class="m">2 × 5</span>.</p>
+      </div>
+      <div class="anatomy" aria-label="مكوّنات القوّة">
+        <div class="m">a<sup>n</sup></div>
+        <div class="lbls"><span>n: الأُسّ</span><span>a: الأساس</span></div>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact"><b>القراءة</b><span class="m">a<sup>2</sup></span> «مربّع a» و<span class="m">a<sup>3</sup></span> «مكعّب a» و<span class="m">a<sup>n</sup></span> «a أُسّ n».</div>
+      <div class="fact"><b>إشارة القوّة</b>أساس سالب وأُسّ زوجيّ ← موجبة: <span class="m">(−2)<sup>4</sup> = 16</span>. وأُسّ فرديّ ← سالبة: <span class="m">(−2)<sup>3</sup> = −8</span>.</div>
+      <div class="fact"><b>قوى العشرة</b><span class="m">10<sup>n</sup></span> هو العدد 1 متبوعًا بـ n أصفار: <span class="m">10<sup>6</sup> = 1 000 000</span>.</div>
+    </div>
+  </section>
+
+  <!-- 2. Rules -->
+  <section>
+    <h2>القواعد <span class="tag">الأساس نفسه في كلّ قاعدة</span></h2>
+    <div class="rules">
+      <div class="rule">
+        <div class="name">حالتان خاصّتان</div>
+        <div class="law m">a<sup>1</sup> = a &nbsp;&nbsp; a<sup>0</sup> = 1 <small>(a ≠ 0)</small></div>
+        <div class="ex"><span class="m">7<sup>1</sup> = 7</span> و <span class="m">2026<sup>0</sup> = 1</span></div>
+      </div>
+      <div class="rule">
+        <div class="name">جداء قوّتين <small>· نجمع الأُسّين</small></div>
+        <div class="law m">a<sup>m</sup> × a<sup>n</sup> = a<sup>m+n</sup></div>
+        <div class="ex"><span class="m">2<sup>3</sup> × 2<sup>4</sup> = 2<sup>7</sup> = 128</span></div>
+      </div>
+      <div class="rule">
+        <div class="name">قسمة قوّتين <small>· نطرح الأُسّين</small></div>
+        <div class="law m">a<sup>m</sup> ÷ a<sup>n</sup> = a<sup>m−n</sup></div>
+        <div class="ex"><span class="m">10<sup>8</sup> ÷ 10<sup>5</sup> = 10<sup>3</sup> = 1000</span></div>
+      </div>
+      <div class="rule">
+        <div class="name">قوّة القوّة <small>· نضرب الأُسّين</small></div>
+        <div class="law m">(a<sup>m</sup>)<sup>n</sup> = a<sup>m×n</sup></div>
+        <div class="ex"><span class="m">(3<sup>2</sup>)<sup>3</sup> = 3<sup>6</sup> = 729</span></div>
+      </div>
+      <div class="rule">
+        <div class="name">قوّة الجداء <small>· نوزّع الأُسّ</small></div>
+        <div class="law m">(a × b)<sup>n</sup> = a<sup>n</sup> × b<sup>n</sup></div>
+        <div class="ex"><span class="m">5<sup>3</sup> × 2<sup>3</sup> = 10<sup>3</sup> = 1000</span></div>
+      </div>
+      <div class="rule">
+        <div class="name">قوّة الحاصل <small>· نوزّع الأُسّ</small></div>
+        <div class="law m">(a ÷ b)<sup>n</sup> = a<sup>n</sup> ÷ b<sup>n</sup></div>
+        <div class="ex"><span class="m">(6 ÷ 3)<sup>4</sup> = 6<sup>4</sup> ÷ 3<sup>4</sup> = 16</span></div>
+      </div>
+    </div>
+    <div class="order" aria-label="أولويّات الحساب">
+      <b>أولويّات الحساب:</b>
+      <span class="step">الأقواس</span><span class="arr">←</span>
+      <span class="step">القوى</span><span class="arr">←</span>
+      <span class="step">الضرب والقسمة</span><span class="arr">←</span>
+      <span class="step">الجمع والطرح</span>
+    </div>
+    <p style="margin-top:8px;font-size:.92rem">مثال: <span class="m">5<sup>2</sup> − 4 × 3 + 2<sup>3</sup> = 25 − 12 + 8 = 21</span></p>
+  </section>
+
+  <!-- 3. Common mistakes -->
+  <section class="warn">
+    <h2>انتبه! أخطاء شائعة</h2>
+    <div class="mistakes">
+      <div class="mis"><span class="m no">2<sup>3</sup> = 6</span> &nbsp; الصحيح: <span class="m yes">2<sup>3</sup> = 8</span><br>القوّة ليست ضرب الأساس في الأُسّ.</div>
+      <div class="mis"><span class="m no">−2<sup>4</sup> = 16</span> &nbsp; الصحيح: <span class="m yes">−2<sup>4</sup> = −16</span><br>بلا أقواس، الأُسّ يخصّ 2 وحده.</div>
+      <div class="mis"><span class="m no">(2 + 5)<sup>2</sup> = 2<sup>2</sup> + 5<sup>2</sup></span><br>الصحيح: <span class="m yes">7<sup>2</sup> = 49</span> وليس 29. الأُسّ لا يتوزّع على الجمع.</div>
+      <div class="mis"><span class="m no">2<sup>3</sup> × 3<sup>2</sup> = 6<sup>5</sup></span><br>الأساسان مختلفان والأُسّان مختلفان، فنحسب كلًّا وحده: <span class="m yes">8 × 9 = 72</span>.</div>
+    </div>
+  </section>
+
+  <!-- 4. Exploratory activity -->
+  <section>
+    <h2>نشاط استكشافي <span class="tag">اكتشف القواعد بنفسك</span></h2>
+    <div class="act-head">
+      <span><b>المدّة:</b> 30 دقيقة</span>
+      <span><b>العمل:</b> مجموعات من 3 طلّاب</span>
+      <span><b>المواد:</b> ورقة A4، مسطرة، آلة حاسبة</span>
+    </div>
+
+    <div class="station">
+      <h3><span class="n">1</span>طيّ الورقة</h3>
+      <ol>
+        <li>اطوِ ورقة A4 من المنتصف، ثم اطوِها مجدّدًا من المنتصف، وهكذا.</li>
+        <li>بعد كلّ طيّة، عُدّ طبقات الورقة وسجّلها في الجدول.</li>
+        <li>اكتب عدد الطبقات على شكل قوّة للعدد 2.</li>
+      </ol>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>عدد الطيّات</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>10</td></tr>
+          <tr><th>عدد الطبقات</th><td>1</td><td>2</td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td></tr>
+          <tr><th>على شكل قوّة</th><td class="m">2<sup>0</sup></td><td class="m">2<sup>1</sup></td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td></tr>
+        </table>
+      </div>
+      <div class="ask"><b>تحدٍّ:</b> سماكة الورقة نحو <span class="m">0.1 mm</span>. لو استطعنا طيّها 42 مرّة، هل تصل سماكتها إلى القمر؟ (المسافة إلى القمر نحو <span class="m">384 400 km</span>.)</div>
+    </div>
+
+    <div class="station">
+      <h3><span class="n">2</span>من الكتابة المفكّكة إلى القاعدة</h3>
+      <p>فكّك كلّ قوّة إلى عوامل، ثم عُدّ العوامل واكتب النتيجة على شكل قوّة واحدة.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>العمليّة</th><th>الكتابة المفكّكة</th><th>عدد العوامل</th><th>قوّة واحدة</th></tr>
+          <tr><td class="m">2<sup>3</sup> × 2<sup>2</sup></td><td class="m">(2×2×2) × (2×2)</td><td>5</td><td class="m">2<sup>5</sup></td></tr>
+          <tr><td class="m">3<sup>2</sup> × 3<sup>4</sup></td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td></tr>
+          <tr><td class="m">2<sup>5</sup> ÷ 2<sup>2</sup></td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td></tr>
+          <tr><td class="m">(5<sup>2</sup>)<sup>3</sup></td><td class="blank">…</td><td class="blank">…</td><td class="blank">…</td></tr>
+        </table>
+      </div>
+      <div class="conclude">
+        <p>أستنتج: <span class="m">a<sup>m</sup> × a<sup>n</sup> = a<sup>?</sup></span> <span class="fill"></span></p>
+        <p>أستنتج: <span class="m">a<sup>m</sup> ÷ a<sup>n</sup> = a<sup>?</sup></span> <span class="fill"></span></p>
+        <p>أستنتج: <span class="m">(a<sup>m</sup>)<sup>n</sup> = a<sup>?</sup></span> <span class="fill"></span></p>
+      </div>
+    </div>
+
+    <div class="station">
+      <h3><span class="n">3</span>لغز الأُسّ صفر</h3>
+      <p>لاحظ النمط: كلّما نقص الأُسّ بواحد، نقسم على 3. أكمل الجدول.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>القوّة</th><td class="m">3<sup>4</sup></td><td class="m">3<sup>3</sup></td><td class="m">3<sup>2</sup></td><td class="m">3<sup>1</sup></td><td class="m">3<sup>0</sup></td></tr>
+          <tr><th>القيمة</th><td>81</td><td>27</td><td class="blank">…</td><td class="blank">…</td><td class="blank">?</td></tr>
+        </table>
+      </div>
+      <div class="ask"><b>ناقش مع مجموعتك:</b> ما قيمة <span class="m">3<sup>0</sup></span>؟ تحقّق من ذلك بقاعدة القسمة: <span class="m">3<sup>2</sup> ÷ 3<sup>2</sup></span>. هل تتغيّر النتيجة إذا استبدلنا 3 بـ 5؟</div>
+    </div>
+
+    <div class="explorer" aria-labelledby="exp-title">
+      <h3 id="exp-title">مختبر القوى: جرّب وتحقّق</h3>
+      <p style="font-size:.9rem;margin-top:4px">اختر الأساس والأُسّين والعمليّة، وراقب الكتابة المفكّكة لترى لماذا تصحّ القاعدة.</p>
+      <div class="controls">
+        <label for="op">العمليّة
+          <select id="op">
+            <option value="mul">جداء قوّتين</option>
+            <option value="div">قسمة قوّتين</option>
+            <option value="pow">قوّة القوّة</option>
+          </select>
+        </label>
+        <label for="base">الأساس a
+          <select id="base"><option>2</option><option selected>3</option><option>5</option><option>10</option><option value="-2">−2</option></select>
+        </label>
+        <label for="m">الأُسّ m
+          <select id="m"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+        </label>
+        <label for="n">الأُسّ n
+          <select id="n"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
+        </label>
+      </div>
+      <div class="out" id="out" aria-live="polite"></div>
+    </div>
+
+    <details>
+      <summary>إجابات النشاط (للمعلّم)</summary>
+      <ul>
+        <li>الطيّ: الطبقات 1، 2، 4، 8، 16، 32، وبعد 10 طيّات <span class="m">2<sup>10</sup> = 1024</span> طبقة.</li>
+        <li>التحدّي: <span class="m">2<sup>42</sup> × 0.1 mm ≈ 439 805 km</span>، أي أكثر من المسافة إلى القمر.</li>
+        <li><span class="m">3<sup>2</sup> × 3<sup>4</sup> = 3<sup>6</sup></span> (6 عوامل)، <span class="m">2<sup>5</sup> ÷ 2<sup>2</sup> = 2<sup>3</sup></span> (نختصر عاملين)، <span class="m">(5<sup>2</sup>)<sup>3</sup> = 5<sup>6</sup></span> (3 مجموعات من عاملين).</li>
+        <li>الاستنتاج: <span class="m">m+n</span> ، <span class="m">m−n</span> ، <span class="m">m×n</span>.</li>
+        <li>الأُسّ صفر: 9، 3، 1. و<span class="m">3<sup>2</sup> ÷ 3<sup>2</sup> = 3<sup>0</sup> = 1</span>، والنتيجة نفسها لكلّ أساس غير معدوم.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>بطاقة مرافقة للدرس الأوّل «القوى وقوى العشرة» في كتاب رياضيات الصفّ السابع، العام الدراسيّ 2026–2027.</footer>
+</article>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var sup = function (b, e) { return paren(b) + '<sup>' + e + '</sup>'; };
+  function paren(b) { return b < 0 ? '(−' + Math.abs(b) + ')' : String(b); }
+  function pw(b, e) { return BigInt(b) ** BigInt(e); }
+  function fmt(v) {
+    var neg = v < 0n, s = (neg ? -v : v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return (neg ? '−' : '') + s;
+  }
+  function factors(b, k, cls) {
+    var a = [];
+    for (var i = 0; i < k; i++) a.push('<span class="' + (cls || '') + '">' + paren(b) + '</span>');
+    return a.join(' × ');
+  }
+  function render() {
+    var op = $('op').value, b = +$('base').value, m = +$('m').value, n = +$('n').value, html = '';
+    if (op === 'mul') {
+      html = '<div class="line">' + sup(b, m) + ' × ' + sup(b, n) + ' = (' + factors(b, m, 'f1') + ') × (' + factors(b, n, 'f2') + ')</div>' +
+             '<div class="line">= ' + sup(b, m + n) + ' = ' + fmt(pw(b, m + n)) + '</div>' +
+             '<div class="note">عددنا ' + m + ' + ' + n + ' = ' + (m + n) + ' عاملًا، فالأُسّان يُجمعان.</div>';
+    } else if (op === 'div') {
+      var k = Math.min(m, n), top = [], bot = [];
+      for (var i = 0; i < m; i++) top.push('<span class="' + (i < k ? 'cancel' : 'f1') + '">' + paren(b) + '</span>');
+      for (var j = 0; j < n; j++) bot.push('<span class="cancel">' + paren(b) + '</span>');
+      if (m < n) {
+        html = '<div class="line">' + sup(b, m) + ' ÷ ' + sup(b, n) + '</div>' +
+               '<div class="note">هنا m أصغر من n، فتظهر أُسس سالبة (تُدرس لاحقًا). اختر m ≥ n.</div>';
+      } else {
+        html = '<div class="line">' + sup(b, m) + ' ÷ ' + sup(b, n) + ' = (' + top.join(' × ') + ') ÷ (' + bot.join(' × ') + ')</div>' +
+               '<div class="line">= ' + sup(b, m - n) + ' = ' + fmt(pw(b, m - n)) + '</div>' +
+               '<div class="note">نختصر ' + n + ' عوامل من الأعلى والأسفل، فيبقى ' + m + ' − ' + n + ' = ' + (m - n) +
+               (m === n ? '، أي أنّ القوّة ذات الأُسّ صفر تساوي 1.' : ' عاملًا.') + '</div>';
+      }
+    } else {
+      var groups = [];
+      for (var g = 0; g < n; g++) groups.push('<span class="' + (g % 2 ? 'f2' : 'f1') + '">' + sup(b, m) + '</span>');
+      html = '<div class="line">(' + sup(b, m) + ')<sup>' + n + '</sup> = ' + groups.join(' × ') + '</div>' +
+             '<div class="line">= ' + sup(b, m * n) + ' = ' + fmt(pw(b, m * n)) + '</div>' +
+             '<div class="note">' + n + ' مجموعات في كلّ منها ' + m + ' عوامل: ' + n + ' × ' + m + ' = ' + (m * n) + ' عاملًا.</div>';
+    }
+    $('out').innerHTML = html;
+  }
+  ['op', 'base', 'm', 'n'].forEach(function (id) { $(id).addEventListener('change', render); });
+  render();
+})();
+</script>
